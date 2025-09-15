@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Vote, Menu } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -35,12 +39,29 @@ const Header = () => {
           
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost">
-              Sign In
-            </Button>
-            <Button variant="institutional">
-              Get Started
-            </Button>
+            {user ? (
+              <Button 
+                variant="institutional" 
+                onClick={() => navigate('/dashboard')}
+              >
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost"
+                  onClick={() => navigate('/auth')}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  variant="institutional"
+                  onClick={() => navigate('/auth')}
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
           
           {/* Mobile Menu Button */}
@@ -69,12 +90,32 @@ const Header = () => {
                 Pricing
               </a>
               <div className="flex flex-col space-y-2 pt-4">
-                <Button variant="ghost" className="justify-start">
-                  Sign In
-                </Button>
-                <Button variant="institutional" className="justify-start">
-                  Get Started
-                </Button>
+                {user ? (
+                  <Button 
+                    variant="institutional" 
+                    className="justify-start"
+                    onClick={() => navigate('/dashboard')}
+                  >
+                    Dashboard
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start"
+                      onClick={() => navigate('/auth')}
+                    >
+                      Sign In
+                    </Button>
+                    <Button 
+                      variant="institutional" 
+                      className="justify-start"
+                      onClick={() => navigate('/auth')}
+                    >
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
