@@ -22,10 +22,22 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          light: "hsl(var(--primary-light))",
+          dark: "hsl(var(--primary-dark))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+          light: "hsl(var(--success-light))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+          light: "hsl(var(--warning-light))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -84,6 +96,19 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.6s ease-out",
+        "slide-up": "slide-up 0.6s ease-out",
+        "bounce-in": "bounce-in 0.8s ease-out",
+      },
+      backgroundImage: {
+        "gradient-institutional": "var(--gradient-primary)",
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-secondary": "var(--gradient-secondary)",
+      },
+      boxShadow: {
+        "institutional": "var(--shadow-institutional)",
+        "card-hover": "var(--shadow-card)",
+        "glow": "var(--shadow-glow)",
       },
     },
   },
