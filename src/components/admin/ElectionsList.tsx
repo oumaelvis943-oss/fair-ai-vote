@@ -45,7 +45,16 @@ export default function ElectionsList({ refreshTrigger }: ElectionsListProps) {
       if (error) throw error;
 
       const electionsWithCounts = data.map(election => ({
-        ...election,
+        id: election.id,
+        title: election.title,
+        description: election.description,
+        start_date: election.start_date,
+        end_date: election.end_date,
+        status: election.status as 'draft' | 'active' | 'completed',
+        voting_algorithm: (election.voting_algorithm || 'fptp') as 'fptp' | 'borda_count' | 'ranked_choice',
+        max_candidates: election.max_candidates || 10,
+        require_approval: election.require_approval ?? true,
+        created_at: election.created_at,
         candidate_count: election.candidates?.[0]?.count || 0,
         vote_count: election.votes?.[0]?.count || 0
       }));
