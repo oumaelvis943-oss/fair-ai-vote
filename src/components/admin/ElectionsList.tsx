@@ -44,7 +44,7 @@ export default function ElectionsList({ refreshTrigger }: ElectionsListProps) {
 
       if (error) throw error;
 
-      const electionsWithCounts = data.map(election => ({
+      const electionsWithCounts = data.map((election: any) => ({
         id: election.id,
         title: election.title,
         description: election.description,

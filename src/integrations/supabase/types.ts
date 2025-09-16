@@ -59,10 +59,13 @@ export type Database = {
           description: string | null
           end_date: string
           id: string
+          max_candidates: number | null
+          require_approval: boolean | null
           start_date: string
           status: string
           title: string
           updated_at: string
+          voting_algorithm: string | null
         }
         Insert: {
           created_at?: string
@@ -70,10 +73,13 @@ export type Database = {
           description?: string | null
           end_date: string
           id?: string
+          max_candidates?: number | null
+          require_approval?: boolean | null
           start_date: string
           status?: string
           title: string
           updated_at?: string
+          voting_algorithm?: string | null
         }
         Update: {
           created_at?: string
@@ -81,10 +87,13 @@ export type Database = {
           description?: string | null
           end_date?: string
           id?: string
+          max_candidates?: number | null
+          require_approval?: boolean | null
           start_date?: string
           status?: string
           title?: string
           updated_at?: string
+          voting_algorithm?: string | null
         }
         Relationships: []
       }
