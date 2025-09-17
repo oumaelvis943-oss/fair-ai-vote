@@ -105,6 +105,11 @@ export default function Auth() {
           <CardDescription>
             Access your secure voting platform
           </CardDescription>
+          <div className="text-xs text-muted-foreground mt-2">
+            <strong>Demo Admin Credentials:</strong><br />
+            Email: elvis.ouma@mpesafoundationacademy.ac.ke<br />
+            Password: Mpesa@123
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
