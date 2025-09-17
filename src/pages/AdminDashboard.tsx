@@ -30,12 +30,21 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-primary">SecureVote Admin</h1>
-            <Badge variant="destructive" className="capitalize">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
+                <Settings className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">SecureVote</h1>
+                <p className="text-xs text-muted-foreground">Administration Portal</p>
+              </div>
+            </div>
+            <Badge variant="destructive" className="bg-red-600 hover:bg-red-700 shadow-md">
+              <Settings className="h-3 w-3 mr-1" />
               Administrator
             </Badge>
           </div>
@@ -51,11 +60,20 @@ export default function AdminDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h2>
-          <p className="text-muted-foreground">
-            Manage elections, candidates, and oversee the entire voting process
-          </p>
+        <div className="mb-8 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/5 rounded-2xl -z-10"></div>
+          <div className="p-6">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-3">
+              Administration Center
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Complete control and oversight of the SecureVote election system
+            </p>
+            <div className="flex items-center mt-3 text-sm text-muted-foreground">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+              System Status: Active & Secure
+            </div>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

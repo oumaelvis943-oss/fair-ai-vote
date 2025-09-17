@@ -195,65 +195,96 @@ export default function VoterDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Elections</h1>
-          <p className="text-muted-foreground">
-            Participate in active elections and view results
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-blue-50/30 dark:to-blue-950/10">
+      <div className="p-6 space-y-6">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 via-transparent to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 rounded-2xl -z-10"></div>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Vote className="h-7 w-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Voting Portal
+                  </h1>
+                  <p className="text-muted-foreground text-lg">
+                    Exercise your democratic right to vote
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center space-x-2 mb-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-foreground">
+                    {elections.length} Active Election{elections.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">Updated live</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Vote className="h-5 w-5 text-primary" />
-          <span className="text-sm text-muted-foreground">
-            {elections.length} Active Election{elections.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-      </div>
 
-      {elections.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              No Active Elections
-            </h3>
-            <p className="text-muted-foreground">
-              There are currently no elections available for voting.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
+        {elections.length === 0 ? (
+          <Card className="text-center py-16 border-dashed border-2 border-muted bg-gradient-to-br from-blue-50/30 to-indigo-50/20 dark:from-blue-950/10 dark:to-indigo-950/5">
+            <CardContent>
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Clock className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-3">
+                No Active Elections
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                There are currently no elections available for voting. Check back later or contact your administrator.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {elections.map(election => {
             const electionCandidates = candidates[election.id] || [];
             const hasVoted = !!userVotes[election.id];
             const isActive = isElectionActive(election.start_date, election.end_date);
 
-            return (
-              <Card key={election.id} className="card-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{election.title}</CardTitle>
-                      <CardDescription>{election.description}</CardDescription>
+              return (
+                <Card key={election.id} className="card-shadow border-0 bg-gradient-to-br from-white to-blue-50/50 dark:from-gray-900 dark:to-blue-950/20 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mt-1">
+                          <Vote className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl text-foreground">{election.title}</CardTitle>
+                          <CardDescription className="mt-1 text-muted-foreground">{election.description}</CardDescription>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant={hasVoted ? "default" : isActive ? "secondary" : "outline"}
+                        className={`${hasVoted 
+                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md border-0" 
+                          : isActive 
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0"
+                          : "border-muted-foreground/30"
+                        } px-3 py-1`}
+                      >
+                        {hasVoted ? (
+                          <>
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Voted
+                          </>
+                        ) : isActive ? (
+                          <>
+                            <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse"></div>
+                            Active
+                          </>
+                        ) : (
+                          "Ended"
+                        )}
+                      </Badge>
                     </div>
-                    <Badge 
-                      variant={hasVoted ? "default" : isActive ? "secondary" : "outline"}
-                      className={hasVoted ? "bg-success text-success-foreground" : ""}
-                    >
-                      {hasVoted ? (
-                        <>
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Voted
-                        </>
-                      ) : isActive ? (
-                        "Active"
-                      ) : (
-                        "Ended"
-                      )}
-                    </Badge>
-                  </div>
                   <div className="flex items-center text-sm text-muted-foreground space-x-4">
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
@@ -275,35 +306,50 @@ export default function VoterDashboard() {
                       electionCandidates.map(candidate => (
                         <div 
                           key={candidate.id} 
-                          className={`p-3 border rounded-lg ${
+                          className={`p-4 border rounded-xl transition-all duration-200 ${
                             userVotes[election.id] === candidate.id 
-                              ? 'border-success bg-success-light' 
-                              : 'border-border'
+                              ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 shadow-md' 
+                              : 'border-border hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/30 dark:hover:bg-blue-950/10'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">
-                                {candidate.profiles?.full_name || 'Unknown Candidate'}
-                              </h4>
-                              {candidate.platform_statement && (
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {candidate.platform_statement}
-                                </p>
+                            <div className="flex items-start space-x-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+                                userVotes[election.id] === candidate.id
+                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              }`}>
+                                {candidate.profiles?.full_name?.charAt(0) || '?'}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-foreground">
+                                  {candidate.profiles?.full_name || 'Unknown Candidate'}
+                                </h4>
+                                {candidate.platform_statement && (
+                                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                                    {candidate.platform_statement}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {!hasVoted && isActive && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleVote(election.id, candidate.id)}
+                                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 border-0 shadow-md"
+                                >
+                                  <Vote className="h-3 w-3 mr-1" />
+                                  Vote
+                                </Button>
+                              )}
+                              {userVotes[election.id] === candidate.id && (
+                                <div className="flex items-center space-x-1 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                  <span className="text-xs font-medium text-green-700 dark:text-green-400">Selected</span>
+                                </div>
                               )}
                             </div>
-                            {!hasVoted && isActive && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleVote(election.id, candidate.id)}
-                                className="ml-4"
-                              >
-                                Vote
-                              </Button>
-                            )}
-                            {userVotes[election.id] === candidate.id && (
-                              <CheckCircle className="h-5 w-5 text-success ml-4" />
-                            )}
                           </div>
                         </div>
                       ))
@@ -313,8 +359,9 @@ export default function VoterDashboard() {
               </Card>
             );
           })}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
