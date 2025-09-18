@@ -97,6 +97,53 @@ export type Database = {
         }
         Relationships: []
       }
+      encrypted_votes: {
+        Row: {
+          block_id: string | null
+          created_at: string
+          digital_signature: string
+          election_id: string
+          encrypted_vote: string
+          id: string
+          timestamp: string
+          verification_status: string
+          vote_hash: string
+          voter_public_key: string
+        }
+        Insert: {
+          block_id?: string | null
+          created_at?: string
+          digital_signature: string
+          election_id: string
+          encrypted_vote: string
+          id?: string
+          timestamp?: string
+          verification_status?: string
+          vote_hash: string
+          voter_public_key: string
+        }
+        Update: {
+          block_id?: string | null
+          created_at?: string
+          digital_signature?: string
+          election_id?: string
+          encrypted_vote?: string
+          id?: string
+          timestamp?: string
+          verification_status?: string
+          vote_hash?: string
+          voter_public_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encrypted_votes_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "vote_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -124,6 +171,75 @@ export type Database = {
           role?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      vote_audit_trail: {
+        Row: {
+          election_id: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          timestamp: string
+          user_agent: string | null
+          voter_id: string | null
+        }
+        Insert: {
+          election_id?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          voter_id?: string | null
+        }
+        Update: {
+          election_id?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          voter_id?: string | null
+        }
+        Relationships: []
+      }
+      vote_blocks: {
+        Row: {
+          block_hash: string
+          block_number: number
+          created_at: string
+          id: string
+          merkle_root: string
+          nonce: string
+          previous_block_hash: string | null
+          timestamp: string
+          votes_count: number
+        }
+        Insert: {
+          block_hash: string
+          block_number: number
+          created_at?: string
+          id?: string
+          merkle_root: string
+          nonce: string
+          previous_block_hash?: string | null
+          timestamp?: string
+          votes_count?: number
+        }
+        Update: {
+          block_hash?: string
+          block_number?: number
+          created_at?: string
+          id?: string
+          merkle_root?: string
+          nonce?: string
+          previous_block_hash?: string | null
+          timestamp?: string
+          votes_count?: number
         }
         Relationships: []
       }
@@ -174,7 +290,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_latest_block: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          block_hash: string
+          block_number: number
+          created_at: string
+          id: string
+          merkle_root: string
+          nonce: string
+          previous_block_hash: string | null
+          timestamp: string
+          votes_count: number
+        }
+      }
     }
     Enums: {
       [_ in never]: never
