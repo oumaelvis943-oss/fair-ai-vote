@@ -52,6 +52,51 @@ export type Database = {
           },
         ]
       }
+      election_analytics: {
+        Row: {
+          additional_data: Json | null
+          candidate_id: string | null
+          election_id: string
+          id: string
+          metric_type: string
+          metric_value: number
+          timestamp: string
+        }
+        Insert: {
+          additional_data?: Json | null
+          candidate_id?: string | null
+          election_id: string
+          id?: string
+          metric_type: string
+          metric_value?: number
+          timestamp?: string
+        }
+        Update: {
+          additional_data?: Json | null
+          candidate_id?: string | null
+          election_id?: string
+          id?: string
+          metric_type?: string
+          metric_value?: number
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_analytics_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_analytics_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       elections: {
         Row: {
           created_at: string
@@ -59,12 +104,14 @@ export type Database = {
           description: string | null
           end_date: string
           id: string
+          is_public: boolean | null
           max_candidates: number | null
           require_approval: boolean | null
           start_date: string
           status: string
           title: string
           updated_at: string
+          voter_list_uploaded: boolean | null
           voting_algorithm: string | null
         }
         Insert: {
@@ -73,12 +120,14 @@ export type Database = {
           description?: string | null
           end_date: string
           id?: string
+          is_public?: boolean | null
           max_candidates?: number | null
           require_approval?: boolean | null
           start_date: string
           status?: string
           title: string
           updated_at?: string
+          voter_list_uploaded?: boolean | null
           voting_algorithm?: string | null
         }
         Update: {
@@ -87,15 +136,58 @@ export type Database = {
           description?: string | null
           end_date?: string
           id?: string
+          is_public?: boolean | null
           max_candidates?: number | null
           require_approval?: boolean | null
           start_date?: string
           status?: string
           title?: string
           updated_at?: string
+          voter_list_uploaded?: boolean | null
           voting_algorithm?: string | null
         }
         Relationships: []
+      }
+      eligible_voters: {
+        Row: {
+          additional_info: Json | null
+          created_at: string
+          election_id: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          voter_id_number: string | null
+        }
+        Insert: {
+          additional_info?: Json | null
+          created_at?: string
+          election_id: string
+          email: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          voter_id_number?: string | null
+        }
+        Update: {
+          additional_info?: Json | null
+          created_at?: string
+          election_id?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          voter_id_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eligible_voters_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       encrypted_votes: {
         Row: {

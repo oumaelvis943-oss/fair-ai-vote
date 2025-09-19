@@ -32,9 +32,6 @@ const Header = () => {
             <a href="#roles" className="text-muted-foreground hover:text-foreground transition-colors">
               Roles
             </a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
-            </a>
           </nav>
           
           {/* CTA Buttons */}
@@ -85,9 +82,6 @@ const Header = () => {
               </a>
               <a href="#roles" className="text-muted-foreground hover:text-foreground transition-colors">
                 Roles
-              </a>
-              <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                Pricing
               </a>
               <div className="flex flex-col space-y-2 pt-4">
                 {user ? (

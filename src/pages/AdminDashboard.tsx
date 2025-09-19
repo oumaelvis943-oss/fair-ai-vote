@@ -6,7 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import CreateElectionForm from '@/components/admin/CreateElectionForm';
 import ElectionsList from '@/components/admin/ElectionsList';
-import { Vote, Users, Settings, FileText, Plus, BarChart3 } from 'lucide-react';
+import VoterListUpload from '@/components/admin/VoterListUpload';
+import ElectionAnalytics from '@/components/admin/ElectionAnalytics';
+import AuditTrailViewer from '@/components/admin/AuditTrailViewer';
+import CandidateEvaluationDashboard from '@/components/admin/CandidateEvaluationDashboard';
+import { Vote, Users, Settings, FileText, Plus, BarChart3, Shield, Upload, UserCheck } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { profile, signOut } = useAuth();
@@ -77,7 +81,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -88,11 +92,23 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Create Election
+              Create
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Users
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="candidates" className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              Candidates
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Upload
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Audit
             </TabsTrigger>
           </TabsList>
 
@@ -187,24 +203,43 @@ export default function AdminDashboard() {
             <CreateElectionForm onElectionCreated={handleElectionCreated} />
           </TabsContent>
 
-          <TabsContent value="users">
-            <Card className="card-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  User Management
-                </CardTitle>
-                <CardDescription>
-                  Manage users, roles, and permissions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>User management features coming in Phase 2</p>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="analytics">
+            <ElectionAnalytics />
+          </TabsContent>
+
+          <TabsContent value="candidates">
+            <CandidateEvaluationDashboard />
+          </TabsContent>
+
+          <TabsContent value="upload">
+            <div className="space-y-6">
+              <Card className="card-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5 text-primary" />
+                    Voter Management
+                  </CardTitle>
+                  <CardDescription>
+                    Upload eligible voter lists for elections
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select an election from the Elections tab to upload a voter list for that specific election.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveTab('elections')}
+                  >
+                    Go to Elections
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="audit">
+            <AuditTrailViewer />
           </TabsContent>
         </Tabs>
       </main>

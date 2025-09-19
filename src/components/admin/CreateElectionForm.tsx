@@ -28,7 +28,8 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
     end_date: '',
     voting_algorithm: '' as VotingAlgorithm,
     max_candidates: 10,
-    require_approval: true
+    require_approval: true,
+    is_public: false
   });
 
   const votingAlgorithms = [
@@ -68,6 +69,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
           voting_algorithm: formData.voting_algorithm,
           max_candidates: formData.max_candidates,
           require_approval: formData.require_approval,
+          is_public: formData.is_public,
           created_by: user.id,
           status: 'draft'
         });
@@ -87,7 +89,8 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         end_date: '',
         voting_algorithm: '' as VotingAlgorithm,
         max_candidates: 10,
-        require_approval: true
+        require_approval: true,
+        is_public: false
       });
 
       onElectionCreated();
@@ -215,17 +218,32 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="require_approval"
-              checked={formData.require_approval}
-              onChange={(e) => setFormData({ ...formData, require_approval: e.target.checked })}
-              className="rounded border-input"
-            />
-            <Label htmlFor="require_approval" className="text-sm">
-              Require admin approval for candidate applications
-            </Label>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="require_approval"
+                checked={formData.require_approval}
+                onChange={(e) => setFormData({ ...formData, require_approval: e.target.checked })}
+                className="rounded border-input"
+              />
+              <Label htmlFor="require_approval" className="text-sm">
+                Require admin approval for candidate applications
+              </Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="is_public"
+                checked={formData.is_public}
+                onChange={(e) => setFormData({ ...formData, is_public: e.target.checked })}
+                className="rounded border-input"
+              />
+              <Label htmlFor="is_public" className="text-sm">
+                Make election public (voters can apply to participate)
+              </Label>
+            </div>
           </div>
 
           <div className="flex gap-2 pt-4">
