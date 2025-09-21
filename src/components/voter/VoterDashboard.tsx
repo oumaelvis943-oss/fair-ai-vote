@@ -4,13 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, Vote, CheckCircle, Users, Shield, Search, UserCheck, Send } from 'lucide-react';
+import { Clock, Vote, CheckCircle, Users, Shield, Search, UserCheck, Send, Bell, BellRing } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SecureVotingInterface from '@/components/voting/SecureVotingInterface';
 import BlockchainVerification from '@/components/voting/BlockchainVerification';
 import CandidateApplicationForm from './CandidateApplicationForm';
+import NotificationCenter from '@/components/admin/NotificationCenter';
 
 interface Election {
   id: string;
@@ -50,12 +51,53 @@ export default function VoterDashboard() {
   const [selectedElectionForApplication, setSelectedElectionForApplication] = useState<Election | null>(null);
   const [publicElections, setPublicElections] = useState<Election[]>([]);
   const [userApplications, setUserApplications] = useState<Record<string, string>>({});
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('read', false);
+
+      if (error) throw error;
+      setUnreadNotifications(data?.length || 0);
+    } catch (error: any) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
 
   useEffect(() => {
     fetchElections();
     fetchPublicElections();
     fetchUserApplications();
-  }, []);
+    fetchNotifications();
+
+    // Real-time subscription for new notifications
+    const channel = supabase
+      .channel('voter_notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          fetchNotifications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const fetchElections = async () => {
     try {
@@ -196,18 +238,43 @@ export default function VoterDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
+          {showNotifications && (
+            <div className="fixed top-4 right-4 z-50">
+              <NotificationCenter onClose={() => setShowNotifications(false)} />
+            </div>
+          )}
+          
           <Card className="mb-8 card-shadow border-primary/20">
             <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                  <Vote className="h-6 w-6 text-primary-foreground" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                    <Vote className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl text-primary">Secure Voter Dashboard</CardTitle>
+                    <CardDescription className="text-lg">
+                      Participate in blockchain-secured, encrypted elections
+                    </CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-2xl text-primary">Secure Voter Dashboard</CardTitle>
-                  <CardDescription className="text-lg">
-                    Participate in blockchain-secured, encrypted elections
-                  </CardDescription>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative"
+                >
+                  {unreadNotifications > 0 ? (
+                    <>
+                      <BellRing className="h-4 w-4" />
+                      <Badge variant="destructive" className="absolute -top-2 -right-2 w-5 h-5 text-xs p-0 flex items-center justify-center">
+                        {unreadNotifications}
+                      </Badge>
+                    </>
+                  ) : (
+                    <Bell className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </CardHeader>
           </Card>

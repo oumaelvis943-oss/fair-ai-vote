@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, Users, Vote, Settings, Play, Pause, Eye, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Users, Vote, Settings, Play, Pause, Eye, Trash2, Edit, Bell } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface Election {
@@ -17,6 +17,8 @@ interface Election {
   voting_algorithm: 'fptp' | 'borda_count' | 'ranked_choice';
   max_candidates: number;
   require_approval: boolean;
+  is_public: boolean;
+  positions: string[];
   created_at: string;
   candidate_count?: number;
   vote_count?: number;
@@ -24,9 +26,10 @@ interface Election {
 
 interface ElectionsListProps {
   refreshTrigger: number;
+  onEditElection?: (election: Election) => void;
 }
 
-export default function ElectionsList({ refreshTrigger }: ElectionsListProps) {
+export default function ElectionsList({ refreshTrigger, onEditElection }: ElectionsListProps) {
   const [elections, setElections] = useState<Election[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -54,6 +57,8 @@ export default function ElectionsList({ refreshTrigger }: ElectionsListProps) {
         voting_algorithm: (election.voting_algorithm || 'fptp') as 'fptp' | 'borda_count' | 'ranked_choice',
         max_candidates: election.max_candidates || 10,
         require_approval: election.require_approval ?? true,
+        is_public: election.is_public ?? false,
+        positions: election.positions || [],
         created_at: election.created_at,
         candidate_count: election.candidates?.[0]?.count || 0,
         vote_count: election.votes?.[0]?.count || 0
@@ -118,6 +123,44 @@ export default function ElectionsList({ refreshTrigger }: ElectionsListProps) {
       });
 
       fetchElections();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const notifyVoters = async (electionId: string, electionTitle: string) => {
+    try {
+      // Get all voters (users with voter role or eligible voters for this election)
+      const { data: voters, error } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('role', 'voter');
+
+      if (error) throw error;
+
+      // Create notifications for all voters
+      const notifications = voters.map(voter => ({
+        user_id: voter.user_id,
+        election_id: electionId,
+        type: 'election_created',
+        title: 'New Election Available',
+        message: `A new election "${electionTitle}" is now open for candidate applications. Apply now to participate!`
+      }));
+
+      const { error: notifError } = await supabase
+        .from('notifications')
+        .insert(notifications);
+
+      if (notifError) throw notifError;
+
+      toast({
+        title: "Voters Notified",
+        description: `${voters.length} voters have been notified about the election.`,
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -228,6 +271,28 @@ export default function ElectionsList({ refreshTrigger }: ElectionsListProps) {
                     >
                       <Pause className="h-3 w-3" />
                       Complete
+                    </Button>
+                  )}
+                  {election.status === 'draft' && onEditElection && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onEditElection(election)}
+                      className="flex items-center gap-1"
+                    >
+                      <Edit className="h-3 w-3" />
+                      Edit
+                    </Button>
+                  )}
+                  {election.status === 'draft' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => notifyVoters(election.id, election.title)}
+                      className="flex items-center gap-1"
+                    >
+                      <Bell className="h-3 w-3" />
+                      Notify Voters
                     </Button>
                   )}
                   <Button

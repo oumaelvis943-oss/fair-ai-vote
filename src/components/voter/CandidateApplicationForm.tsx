@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +20,7 @@ interface Election {
   end_date: string;
   max_candidates: number;
   is_public: boolean;
+  positions?: string[];
 }
 
 interface CandidateApplicationFormProps {
@@ -36,6 +38,7 @@ export default function CandidateApplicationForm({
   const { toast } = useToast();
   
   const [platformStatement, setPlatformStatement] = useState('');
+  const [selectedPosition, setSelectedPosition] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
@@ -45,6 +48,15 @@ export default function CandidateApplicationForm({
       toast({
         title: "Error",
         description: "Please provide your platform statement",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (election.positions && election.positions.length > 0 && !selectedPosition) {
+      toast({
+        title: "Error",
+        description: "Please select a position to apply for",
         variant: "destructive",
       });
       return;
@@ -86,6 +98,7 @@ export default function CandidateApplicationForm({
           user_id: user?.id,
           election_id: election.id,
           platform_statement: platformStatement,
+          position: election.positions && election.positions.length > 0 ? selectedPosition : null,
           status: 'pending'
         });
 
@@ -185,6 +198,24 @@ export default function CandidateApplicationForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmitApplication} className="space-y-6">
+            {election.positions && election.positions.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="position">Position *</Label>
+                <Select value={selectedPosition} onValueChange={setSelectedPosition} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a position to apply for" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {election.positions.map((position) => (
+                      <SelectItem key={position} value={position}>
+                        {position}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="platformStatement">Platform Statement *</Label>
               <Textarea

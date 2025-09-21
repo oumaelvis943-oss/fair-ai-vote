@@ -20,6 +20,7 @@ export type Database = {
           election_id: string
           id: string
           platform_statement: string | null
+          position: string | null
           status: string
           updated_at: string
           user_id: string
@@ -29,6 +30,7 @@ export type Database = {
           election_id: string
           id?: string
           platform_statement?: string | null
+          position?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -38,6 +40,7 @@ export type Database = {
           election_id?: string
           id?: string
           platform_statement?: string | null
+          position?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -106,6 +109,7 @@ export type Database = {
           id: string
           is_public: boolean | null
           max_candidates: number | null
+          positions: Json | null
           require_approval: boolean | null
           start_date: string
           status: string
@@ -122,6 +126,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           max_candidates?: number | null
+          positions?: Json | null
           require_approval?: boolean | null
           start_date: string
           status?: string
@@ -138,6 +143,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           max_candidates?: number | null
+          positions?: Json | null
           require_approval?: boolean | null
           start_date?: string
           status?: string
@@ -235,6 +241,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          election_id: string | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          election_id?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          election_id?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

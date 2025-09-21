@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CreateElectionForm from '@/components/admin/CreateElectionForm';
+import EditElectionForm from '@/components/admin/EditElectionForm';
 import ElectionsList from '@/components/admin/ElectionsList';
 import VoterListUpload from '@/components/admin/VoterListUpload';
 import ElectionAnalytics from '@/components/admin/ElectionAnalytics';
@@ -13,14 +15,38 @@ import CandidateEvaluationDashboard from '@/components/admin/CandidateEvaluation
 import AdminSettings from '@/components/admin/AdminSettings';
 import { Vote, Users, Settings, FileText, Plus, BarChart3, Shield, Upload, UserCheck } from 'lucide-react';
 
+interface Election {
+  id: string;
+  title: string;
+  description: string | null;
+  start_date: string;
+  end_date: string;
+  voting_algorithm: 'fptp' | 'borda_count' | 'ranked_choice';
+  max_candidates: number;
+  require_approval: boolean;
+  is_public: boolean;
+  positions: string[];
+  status: string;
+}
+
 export default function AdminDashboard() {
   const { profile, signOut } = useAuth();
   const [refreshElections, setRefreshElections] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
+  const [editingElection, setEditingElection] = useState<Election | null>(null);
 
   const handleElectionCreated = () => {
     setRefreshElections(prev => prev + 1);
     setActiveTab('elections');
+  };
+
+  const handleElectionUpdated = () => {
+    setRefreshElections(prev => prev + 1);
+    setEditingElection(null);
+  };
+
+  const handleEditElection = (election: Election) => {
+    setEditingElection(election);
   };
 
   const handleSignOut = async () => {
@@ -201,7 +227,10 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="elections">
-            <ElectionsList refreshTrigger={refreshElections} />
+            <ElectionsList 
+              refreshTrigger={refreshElections} 
+              onEditElection={handleEditElection}
+            />
           </TabsContent>
 
           <TabsContent value="create">
@@ -251,6 +280,21 @@ export default function AdminDashboard() {
             <AdminSettings />
           </TabsContent>
         </Tabs>
+
+        <Dialog open={!!editingElection} onOpenChange={() => setEditingElection(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Election</DialogTitle>
+            </DialogHeader>
+            {editingElection && (
+              <EditElectionForm
+                election={editingElection}
+                onElectionUpdated={handleElectionUpdated}
+                onClose={() => setEditingElection(null)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,30 +7,44 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, Users, Vote, Settings, Plus, X } from 'lucide-react';
+import { Calendar, Clock, Users, Vote, Settings, Plus, X, Save } from 'lucide-react';
 
 type VotingAlgorithm = 'fptp' | 'borda_count' | 'ranked_choice';
 
-interface CreateElectionFormProps {
-  onElectionCreated: () => void;
+interface Election {
+  id: string;
+  title: string;
+  description: string | null;
+  start_date: string;
+  end_date: string;
+  voting_algorithm: VotingAlgorithm;
+  max_candidates: number;
+  require_approval: boolean;
+  is_public: boolean;
+  positions: string[];
+  status: string;
 }
 
-export default function CreateElectionForm({ onElectionCreated }: CreateElectionFormProps) {
-  const { user } = useAuth();
+interface EditElectionFormProps {
+  election: Election;
+  onElectionUpdated: () => void;
+  onClose: () => void;
+}
+
+export default function EditElectionForm({ election, onElectionUpdated, onClose }: EditElectionFormProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    start_date: '',
-    end_date: '',
-    voting_algorithm: '' as VotingAlgorithm,
-    max_candidates: 10,
-    require_approval: true,
-    is_public: false,
-    positions: ['']
+    title: election.title,
+    description: election.description || '',
+    start_date: election.start_date.slice(0, 16),
+    end_date: election.end_date.slice(0, 16),
+    voting_algorithm: election.voting_algorithm,
+    max_candidates: election.max_candidates,
+    require_approval: election.require_approval,
+    is_public: election.is_public,
+    positions: election.positions?.length ? election.positions : ['']
   });
 
   const votingAlgorithms = [
@@ -56,13 +70,12 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
     setLoading(true);
+
     try {
       const { error } = await supabase
         .from('elections')
-        .insert({
+        .update({
           title: formData.title,
           description: formData.description,
           start_date: formData.start_date,
@@ -71,32 +84,19 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
           max_candidates: formData.max_candidates,
           require_approval: formData.require_approval,
           is_public: formData.is_public,
-          positions: formData.positions.filter(p => p.trim()),
-          created_by: user.id,
-          status: 'draft'
-        });
+          positions: formData.positions.filter(p => p.trim())
+        })
+        .eq('id', election.id);
 
       if (error) throw error;
 
       toast({
-        title: "Election Created",
-        description: "Election has been successfully created in draft status.",
+        title: "Election Updated",
+        description: "Election has been successfully updated.",
       });
 
-      // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        start_date: '',
-        end_date: '',
-        voting_algorithm: '' as VotingAlgorithm,
-        max_candidates: 10,
-        require_approval: true,
-        is_public: false,
-        positions: ['']
-      });
-
-      onElectionCreated();
+      onElectionUpdated();
+      onClose();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -115,10 +115,10 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Vote className="h-5 w-5 text-primary" />
-          Create New Election
+          Edit Election
         </CardTitle>
         <CardDescription>
-          Set up a new election with your preferred voting algorithm and parameters
+          Update election details and configuration
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -171,6 +171,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                 required
+                disabled={election.status !== 'draft'}
               />
             </div>
             <div className="space-y-2">
@@ -184,6 +185,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                 required
+                disabled={election.status === 'completed'}
               />
             </div>
           </div>
@@ -194,6 +196,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
               value={formData.voting_algorithm} 
               onValueChange={(value: VotingAlgorithm) => setFormData({ ...formData, voting_algorithm: value })}
               required
+              disabled={election.status !== 'draft'}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Choose voting algorithm" />
@@ -290,8 +293,12 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
           </div>
 
           <div className="flex gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? 'Creating...' : 'Create Election'}
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Updating...' : 'Update Election'}
             </Button>
           </div>
         </form>
