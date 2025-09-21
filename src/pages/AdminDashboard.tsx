@@ -10,6 +10,7 @@ import VoterListUpload from '@/components/admin/VoterListUpload';
 import ElectionAnalytics from '@/components/admin/ElectionAnalytics';
 import AuditTrailViewer from '@/components/admin/AuditTrailViewer';
 import CandidateEvaluationDashboard from '@/components/admin/CandidateEvaluationDashboard';
+import AdminSettings from '@/components/admin/AdminSettings';
 import { Vote, Users, Settings, FileText, Plus, BarChart3, Shield, Upload, UserCheck } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -81,7 +82,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -109,6 +110,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="audit" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Audit
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -240,6 +245,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="audit">
             <AuditTrailViewer />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <AdminSettings />
           </TabsContent>
         </Tabs>
       </main>

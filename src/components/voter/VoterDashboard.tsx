@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, Vote, CheckCircle, Users, Shield, Search } from 'lucide-react';
+import { Clock, Vote, CheckCircle, Users, Shield, Search, UserCheck, Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SecureVotingInterface from '@/components/voting/SecureVotingInterface';
 import BlockchainVerification from '@/components/voting/BlockchainVerification';
+import CandidateApplicationForm from './CandidateApplicationForm';
 
 interface Election {
   id: string;
@@ -19,6 +20,7 @@ interface Election {
   start_date: string;
   end_date: string;
   max_candidates: number;
+  is_public: boolean;
 }
 
 interface Candidate {
@@ -44,9 +46,15 @@ export default function VoterDashboard() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [votingLoading, setVotingLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('elections');
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [selectedElectionForApplication, setSelectedElectionForApplication] = useState<Election | null>(null);
+  const [publicElections, setPublicElections] = useState<Election[]>([]);
+  const [userApplications, setUserApplications] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchElections();
+    fetchPublicElections();
+    fetchUserApplications();
   }, []);
 
   const fetchElections = async () => {
@@ -94,6 +102,52 @@ export default function VoterDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchPublicElections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('elections')
+        .select('*')
+        .eq('is_public', true)
+        .in('status', ['draft', 'active'])
+        .order('start_date', { ascending: true });
+
+      if (error) throw error;
+      setPublicElections(data || []);
+    } catch (error) {
+      console.error('Error fetching public elections:', error);
+    }
+  };
+
+  const fetchUserApplications = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('candidates')
+        .select('election_id, status')
+        .eq('user_id', user.id);
+
+      const applicationsMap: Record<string, string> = {};
+      data?.forEach(app => {
+        applicationsMap[app.election_id] = app.status;
+      });
+      setUserApplications(applicationsMap);
+    } catch (error) {
+      console.error('Error fetching user applications:', error);
+    }
+  };
+
+  const handleApplyAsCandidate = (election: Election) => {
+    setSelectedElectionForApplication(election);
+    setShowApplicationForm(true);
+  };
+
+  const handleApplicationSubmitted = () => {
+    setShowApplicationForm(false);
+    setSelectedElectionForApplication(null);
+    fetchUserApplications();
   };
 
   const openVotingInterface = async (election: Election) => {
@@ -167,12 +221,25 @@ export default function VoterDashboard() {
                 fetchElections();
               }}
             />
+          ) : showApplicationForm && selectedElectionForApplication ? (
+            <CandidateApplicationForm 
+              election={selectedElectionForApplication}
+              onApplicationSubmitted={handleApplicationSubmitted}
+              onBack={() => {
+                setShowApplicationForm(false);
+                setSelectedElectionForApplication(null);
+              }}
+            />
           ) : (
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="elections" className="flex items-center gap-2">
                   <Vote className="h-4 w-4" />
                   Elections
+                </TabsTrigger>
+                <TabsTrigger value="applications" className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4" />
+                  Applications
                 </TabsTrigger>
                 <TabsTrigger value="verification" className="flex items-center gap-2">
                   <Shield className="h-4 w-4" />
@@ -346,6 +413,83 @@ export default function VoterDashboard() {
                     </CardContent>
                   </Card>
                 )}
+              </TabsContent>
+
+              <TabsContent value="applications" className="space-y-6">
+                <Card className="card-shadow">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="h-5 w-5 text-primary" />
+                      <CardTitle>Candidate Applications</CardTitle>
+                    </div>
+                    <CardDescription>
+                      Apply to become a candidate in public elections
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {publicElections.length === 0 ? (
+                      <Alert>
+                        <UserCheck className="h-4 w-4" />
+                        <AlertDescription>
+                          No public elections available for candidate applications at this time.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <div className="grid gap-4">
+                        {publicElections.map((election) => (
+                          <Card key={election.id} className="hover:shadow-md transition-shadow border-l-4 border-l-accent">
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="font-semibold text-lg">{election.title}</h3>
+                                    <Badge variant="outline">Public</Badge>
+                                    {userApplications[election.id] && (
+                                      <Badge variant={
+                                        userApplications[election.id] === 'approved' ? 'default' :
+                                        userApplications[election.id] === 'pending' ? 'secondary' : 'destructive'
+                                      }>
+                                        <UserCheck className="w-3 h-3 mr-1" />
+                                        {userApplications[election.id]}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-muted-foreground mb-4">{election.description}</p>
+                                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-4 h-4" />
+                                      Starts: {new Date(election.start_date).toLocaleDateString()}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Users className="w-4 h-4" />
+                                      Max: {election.max_candidates} candidates
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Button
+                                    onClick={() => handleApplyAsCandidate(election)}
+                                    disabled={!!userApplications[election.id]}
+                                    variant={userApplications[election.id] ? "outline" : "default"}
+                                  >
+                                    {userApplications[election.id] ? (
+                                      `Application ${userApplications[election.id]}`
+                                    ) : (
+                                      <>
+                                        <Send className="h-4 w-4 mr-2" />
+                                        Apply as Candidate
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="verification">
