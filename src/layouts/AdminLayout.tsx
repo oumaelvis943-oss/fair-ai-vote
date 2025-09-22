@@ -13,9 +13,12 @@ import {
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { profile } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -60,15 +63,15 @@ export default function AdminLayout() {
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9 border-2 border-primary/20">
                     <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                      AD
+                      {profile?.full_name ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'AD'}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex flex-col space-y-1 p-2">
-                  <p className="text-sm font-medium">Administrator</p>
-                  <p className="text-xs text-muted-foreground">admin@votesecure.pro</p>
+                  <p className="text-sm font-medium">{profile?.full_name || 'Administrator'}</p>
+                  <p className="text-xs text-muted-foreground">{profile?.email || 'admin@votesecure.pro'}</p>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
@@ -80,7 +83,12 @@ export default function AdminLayout() {
                   Security
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuItem 
+                  className="text-destructive cursor-pointer"
+                  onClick={() => {
+                    supabase.auth.signOut();
+                  }}
+                >
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>

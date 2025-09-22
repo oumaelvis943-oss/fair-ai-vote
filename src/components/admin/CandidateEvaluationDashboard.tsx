@@ -74,20 +74,29 @@ export default function CandidateEvaluationDashboard() {
       const { data: candidatesData, error: candidatesError } = await supabase
         .from('candidates')
         .select(`
-          *,
-          profiles!candidates_user_id_fkey (
-            full_name,
-            email
-          )
+          *
         `)
         .eq('election_id', selectedElection)
         .order('created_at', { ascending: false });
-
+      
       if (candidatesError) throw candidatesError;
+
+      // Fetch profile information separately for each candidate
+      const candidatesWithProfiles = await Promise.all(
+        (candidatesData || []).map(async (candidate) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('user_id', candidate.user_id)
+            .single();
+
+          return { ...candidate, profile };
+        })
+      );
 
       // Fetch vote counts for each candidate
       const candidatesWithVotes = await Promise.all(
-        (candidatesData || []).map(async (candidate) => {
+        candidatesWithProfiles.map(async (candidate) => {
           const { count, error } = await supabase
             .from('votes')
             .select('*', { count: 'exact', head: true })

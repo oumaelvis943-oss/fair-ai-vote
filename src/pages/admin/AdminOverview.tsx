@@ -46,10 +46,17 @@ export default function AdminOverview() {
 
   const fetchDashboardData = async () => {
     try {
-      const [electionsRes, candidatesRes] = await Promise.all([
+      const [electionsRes, candidatesRes, votersRes, votesRes] = await Promise.all([
         supabase.from('elections').select('*'),
-        supabase.from('candidates').select('*')
+        supabase.from('candidates').select('*'),
+        supabase.from('eligible_voters').select('*', { count: 'exact', head: true }),
+        supabase.from('votes').select('*', { count: 'exact', head: true })
       ]);
+
+      if (electionsRes.error) throw electionsRes.error;
+      if (candidatesRes.error) throw candidatesRes.error;
+      if (votersRes.error) throw votersRes.error;
+      if (votesRes.error) throw votesRes.error;
 
       const elections = electionsRes.data || [];
       const candidates = candidatesRes.data || [];
@@ -58,7 +65,7 @@ export default function AdminOverview() {
       setStats({
         totalElections: elections.length,
         activeElections,
-        totalVoters: 0, // Would need voter data
+        totalVoters: votersRes.count || 0,
         totalCandidates: candidates.length,
         recentActivity: elections.slice(0, 5)
       });
