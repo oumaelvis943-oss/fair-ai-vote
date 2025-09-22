@@ -65,11 +65,11 @@ export default function AuditTrailViewer() {
         .order('timestamp', { ascending: false })
         .limit(100);
 
-      if (filters.election_id) {
+      if (filters.election_id && filters.election_id !== 'all') {
         query = query.eq('election_id', filters.election_id);
       }
 
-      if (filters.event_type) {
+      if (filters.event_type && filters.event_type !== 'all') {
         query = query.eq('event_type', filters.event_type);
       }
 
@@ -164,7 +164,7 @@ export default function AuditTrailViewer() {
                 <SelectValue placeholder="All Elections" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Elections</SelectItem>
+                <SelectItem value="all">All Elections</SelectItem>
                 {elections.map((election) => (
                   <SelectItem key={election.id} value={election.id}>
                     {election.title}
@@ -181,7 +181,7 @@ export default function AuditTrailViewer() {
                 <SelectValue placeholder="All Events" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Events</SelectItem>
+                <SelectItem value="all">All Events</SelectItem>
                 {eventTypes.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type.replace('_', ' ').toUpperCase()}
