@@ -14,36 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_audit_trail: {
+        Row: {
+          ai_model_version: string
+          candidate_id: string
+          confidence_score: number | null
+          decision_type: string
+          id: string
+          input_data: Json
+          output_data: Json
+          processing_time_ms: number | null
+          timestamp: string | null
+        }
+        Insert: {
+          ai_model_version?: string
+          candidate_id: string
+          confidence_score?: number | null
+          decision_type: string
+          id?: string
+          input_data: Json
+          output_data: Json
+          processing_time_ms?: number | null
+          timestamp?: string | null
+        }
+        Update: {
+          ai_model_version?: string
+          candidate_id?: string
+          confidence_score?: number | null
+          decision_type?: string
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          processing_time_ms?: number | null
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_audit_trail_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_applications: {
+        Row: {
+          candidate_id: string
+          created_at: string | null
+          criterion_id: string
+          id: string
+          normalized_score: number | null
+          response_data: Json
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string | null
+          criterion_id: string
+          id?: string
+          normalized_score?: number | null
+          response_data?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string | null
+          criterion_id?: string
+          id?: string
+          normalized_score?: number | null
+          response_data?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_applications_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_evaluation_criteria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_evaluation_criteria: {
+        Row: {
+          created_at: string | null
+          criterion_name: string
+          criterion_type: string
+          election_id: string
+          id: string
+          is_required: boolean | null
+          options: Json | null
+          weight: number
+        }
+        Insert: {
+          created_at?: string | null
+          criterion_name: string
+          criterion_type: string
+          election_id: string
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          weight?: number
+        }
+        Update: {
+          created_at?: string | null
+          criterion_name?: string
+          criterion_type?: string
+          election_id?: string
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_evaluation_criteria_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidates: {
         Row: {
+          ai_ranking: number | null
+          ai_score: number | null
+          application_files: string[] | null
           created_at: string
           election_id: string
+          evaluation_data: Json | null
           id: string
           platform_statement: string | null
           position: string | null
           status: string
           updated_at: string
           user_id: string
+          verification_status: string | null
         }
         Insert: {
+          ai_ranking?: number | null
+          ai_score?: number | null
+          application_files?: string[] | null
           created_at?: string
           election_id: string
+          evaluation_data?: Json | null
           id?: string
           platform_statement?: string | null
           position?: string | null
           status?: string
           updated_at?: string
           user_id: string
+          verification_status?: string | null
         }
         Update: {
+          ai_ranking?: number | null
+          ai_score?: number | null
+          application_files?: string[] | null
           created_at?: string
           election_id?: string
+          evaluation_data?: Json | null
           id?: string
           platform_statement?: string | null
           position?: string | null
           status?: string
           updated_at?: string
           user_id?: string
+          verification_status?: string | null
         }
         Relationships: [
           {
@@ -100,11 +245,57 @@ export type Database = {
           },
         ]
       }
+      election_reports: {
+        Row: {
+          created_at: string | null
+          election_id: string
+          generated_by: string
+          id: string
+          report_data: Json
+          report_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          election_id: string
+          generated_by: string
+          id?: string
+          report_data?: Json
+          report_type: string
+        }
+        Update: {
+          created_at?: string | null
+          election_id?: string
+          generated_by?: string
+          id?: string
+          report_data?: Json
+          report_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_reports_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       elections: {
         Row: {
+          ai_evaluation_enabled: boolean | null
+          blockchain_verification: boolean | null
           created_at: string
           created_by: string
+          custom_form_schema: Json | null
           description: string | null
+          eligibility_criteria: Json | null
           end_date: string
           id: string
           is_public: boolean | null
@@ -119,9 +310,13 @@ export type Database = {
           voting_algorithm: string | null
         }
         Insert: {
+          ai_evaluation_enabled?: boolean | null
+          blockchain_verification?: boolean | null
           created_at?: string
           created_by: string
+          custom_form_schema?: Json | null
           description?: string | null
+          eligibility_criteria?: Json | null
           end_date: string
           id?: string
           is_public?: boolean | null
@@ -136,9 +331,13 @@ export type Database = {
           voting_algorithm?: string | null
         }
         Update: {
+          ai_evaluation_enabled?: boolean | null
+          blockchain_verification?: boolean | null
           created_at?: string
           created_by?: string
+          custom_form_schema?: Json | null
           description?: string | null
+          eligibility_criteria?: Json | null
           end_date?: string
           id?: string
           is_public?: boolean | null
@@ -308,6 +507,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_verification: {
+        Row: {
+          created_at: string | null
+          id: string
+          status: string
+          user_id: string
+          verification_data: Json
+          verification_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          status?: string
+          user_id: string
+          verification_data?: Json
+          verification_type: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          status?: string
+          user_id?: string
+          verification_data?: Json
+          verification_type?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_verification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       vote_audit_trail: {
         Row: {
           election_id: string | null
@@ -424,6 +661,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_candidate_ai_score: {
+        Args: { candidate_uuid: string }
+        Returns: number
+      }
       get_latest_block: {
         Args: Record<PropertyKey, never>
         Returns: {
