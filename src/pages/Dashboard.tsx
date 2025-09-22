@@ -31,9 +31,10 @@ export default function Dashboard() {
     return null;
   }
 
-  // Redirect admin users to specialized admin dashboard
-  if (profile.role === 'admin') {
-    return <AdminDashboard />;
+  // If user is admin, redirect to admin dashboard
+  if (profile?.role === 'admin') {
+    window.location.href = '/admin';
+    return null;
   }
 
   const handleSignOut = async () => {
