@@ -18,6 +18,8 @@ import AdminCandidates from "./pages/admin/AdminCandidates";
 import AdminUpload from "./pages/admin/AdminUpload";
 import AdminAudit from "./pages/admin/AdminAudit";
 import AdminSettingsPage from "./pages/admin/AdminSettings";
+import VoterApplication from "./pages/VoterApplication";
+import VoterDashboard from "./pages/VoterDashboard";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin-setup" element={<InitialAdminSetup />} />
+            <Route path="/apply" element={<VoterApplication />} />
+            <Route path="/voter" element={<VoterDashboard />} />
             
             {/* Admin Routes with Sidebar Layout */}
             <Route path="/admin" element={<AdminLayout />}>

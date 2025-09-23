@@ -20,10 +20,18 @@ interface AdminSidebarProps {
   setSidebarOpen: (open: boolean) => void;
 }
 
-const navigationItems = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: any;
+  description: string;
+  badge?: string;
+}
+
+const navigationItems: NavigationItem[] = [
   { 
     name: 'Overview', 
-    href: '/admin/overview', 
+    href: '/admin', 
     icon: LayoutDashboard,
     description: 'Dashboard & Key Metrics'
   },
@@ -31,8 +39,7 @@ const navigationItems = [
     name: 'Elections', 
     href: '/admin/elections', 
     icon: Vote,
-    description: 'Manage All Elections',
-    badge: '4'
+    description: 'Manage All Elections'
   },
   { 
     name: 'Create Election', 
@@ -50,8 +57,7 @@ const navigationItems = [
     name: 'Candidates', 
     href: '/admin/candidates', 
     icon: Users,
-    description: 'Candidate Management',
-    badge: '12'
+    description: 'Candidate Management'
   },
   { 
     name: 'Voter Upload', 

@@ -33,7 +33,13 @@ export default function Dashboard() {
 
   // If user is admin, redirect to admin dashboard
   if (profile?.role === 'admin') {
-    window.location.href = '/admin';
+    navigate('/admin');
+    return null;
+  }
+
+  // If user is voter, redirect to voter dashboard
+  if (profile?.role === 'voter') {
+    navigate('/voter');
     return null;
   }
 
@@ -46,31 +52,13 @@ export default function Dashboard() {
     }
   };
 
+  // Fallback for other roles (this should not be reached due to redirects above)
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <h1 className="text-2xl font-bold text-primary">SecureVote</h1>
-            {profile.role === 'voter' || profile.role === 'candidate' ? (
-              <nav className="flex space-x-4">
-                <Button
-                  variant={currentPage === 'dashboard' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setCurrentPage('dashboard')}
-                >
-                  {profile.role === 'candidate' ? 'Candidate Portal' : 'Elections'}
-                </Button>
-                <Button
-                  variant={currentPage === 'settings' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setCurrentPage('settings')}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </Button>
-              </nav>
-            ) : null}
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">
@@ -85,31 +73,16 @@ export default function Dashboard() {
       </header>
 
       <main>
-        {profile.role === 'voter' ? (
-          currentPage === 'dashboard' ? (
-            <VoterDashboard />
-          ) : (
-            <SettingsPage />
-          )
-        ) : profile.role === 'candidate' ? (
-          currentPage === 'dashboard' ? (
-            <div className="container mx-auto px-4 py-8">
-              <div className="text-center py-16">
-                <h2 className="text-3xl font-bold text-foreground mb-4">
-                  Candidate Portal
-                </h2>
-                <p className="text-muted-foreground mb-8">
-                  Advanced candidate features coming soon
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  Phase 2 will include candidate registration and campaign tools
-                </div>
-              </div>
-            </div>
-          ) : (
-            <SettingsPage />
-          )
-        ) : null}
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-16">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Welcome
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              Loading your dashboard...
+            </p>
+          </div>
+        </div>
       </main>
     </div>
   );
