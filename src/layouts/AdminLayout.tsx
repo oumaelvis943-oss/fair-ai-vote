@@ -27,7 +27,7 @@ export default function AdminLayout() {
             
             <div className="flex items-center gap-3 bg-white/0">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow overflow-hidden bg-slate-950">
-                <img src="/src/assets/uchaguzi-logo.png" alt="Uchaguzi MFA Logo" className="h-8 w-8 object-contain" />
+                <img src="/uchaguzi-logo.png" alt="Uchaguzi MFA Logo" className="h-8 w-8 object-contain" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-semibold text-foreground">Uchaguzi MFA</h1>
