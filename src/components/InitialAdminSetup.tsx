@@ -124,7 +124,7 @@ export default function InitialAdminSetup() {
         </div>
         <CardTitle className="text-primary">Initial Admin Setup</CardTitle>
         <CardDescription>
-          Set up the administrator account for SecureVote
+          Set up the administrator account for Uchaguzi MFA
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

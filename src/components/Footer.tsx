@@ -11,7 +11,7 @@ const Footer = () => {
               <div className="p-2 bg-primary-light rounded-lg">
                 <Vote className="h-6 w-6" />
               </div>
-              <span className="text-xl font-bold">SecureVote</span>
+              <span className="text-xl font-bold">Uchaguzi MFA</span>
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
               Transforming institutional elections with secure, AI-powered voting technology.
@@ -46,7 +46,7 @@ const Footer = () => {
             <div className="space-y-3 text-sm text-primary-foreground/80">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>contact@securevote.com</span>
+                <span>contact@uchaguzi-mfa.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
@@ -62,7 +62,7 @@ const Footer = () => {
         
         <div className="border-t border-primary-light/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-primary-foreground/60">
-            © 2024 SecureVote. All rights reserved.
+            © 2024 Uchaguzi MFA. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors">

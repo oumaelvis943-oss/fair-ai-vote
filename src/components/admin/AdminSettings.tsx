@@ -30,7 +30,7 @@ export default function AdminSettings() {
   const [changingPassword, setChangingPassword] = useState(false);
   
   // Platform settings
-  const [platformName, setPlatformName] = useState('SecureVote');
+  const [platformName, setPlatformName] = useState('Uchaguzi MFA');
   const [platformDescription, setPlatformDescription] = useState('Blockchain-based secure voting platform');
   const [enableNotifications, setEnableNotifications] = useState(true);
   const [enableAuditTrail, setEnableAuditTrail] = useState(true);

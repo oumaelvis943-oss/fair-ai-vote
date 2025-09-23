@@ -70,7 +70,7 @@ export default function AdminDashboard() {
                 <Settings className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">SecureVote</h1>
+                <h1 className="text-2xl font-bold text-foreground">Uchaguzi MFA</h1>
                 <p className="text-xs text-muted-foreground">Administration Portal</p>
               </div>
             </div>
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
               Administration Center
             </h2>
             <p className="text-muted-foreground text-lg">
-              Complete control and oversight of the SecureVote election system
+              Complete control and oversight of the Uchaguzi MFA election system
             </p>
             <div className="flex items-center mt-3 text-sm text-muted-foreground">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>

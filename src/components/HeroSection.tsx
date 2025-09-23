@@ -20,7 +20,7 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto">
           {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-primary-light to-primary bg-clip-text text-transparent">
-            SecureVote
+            Uchaguzi MFA
           </h1>
           
           {/* Subheading */}

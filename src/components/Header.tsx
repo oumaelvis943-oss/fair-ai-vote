@@ -18,7 +18,7 @@ const Header = () => {
             <div className="p-2 bg-gradient-institutional rounded-lg">
               <Vote className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">SecureVote</span>
+            <span className="text-xl font-bold text-foreground">Uchaguzi MFA</span>
           </div>
           
           {/* Desktop Navigation */}

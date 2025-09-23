@@ -38,11 +38,15 @@ export default function AdminLayout() {
             </Button>
             
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow">
-                <Shield className="h-6 w-6 text-primary-foreground" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow overflow-hidden">
+                <img 
+                  src="/src/assets/uchaguzi-logo.png" 
+                  alt="Uchaguzi MFA Logo" 
+                  className="h-8 w-8 object-contain"
+                />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold text-foreground">VoteSecure Pro</h1>
+                <h1 className="text-lg font-semibold text-foreground">Uchaguzi MFA</h1>
                 <p className="text-xs text-muted-foreground">Administration Panel</p>
               </div>
             </div>
@@ -67,7 +71,7 @@ export default function AdminLayout() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex flex-col space-y-1 p-2">
                   <p className="text-sm font-medium">{profile?.full_name || 'Administrator'}</p>
-                  <p className="text-xs text-muted-foreground">{profile?.email || 'admin@votesecure.pro'}</p>
+                  <p className="text-xs text-muted-foreground">{profile?.email || 'admin@uchaguzi-mfa.com'}</p>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
