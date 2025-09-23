@@ -5,45 +5,29 @@ import { useState } from 'react';
 import { Menu, X, Shield, Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator 
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationBell from '@/components/admin/NotificationBell';
-
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { profile } = useAuth();
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+  const {
+    profile
+  } = useAuth();
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Enterprise Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/95 backdrop-blur-sm">
         <div className="flex h-16 items-center justify-between px-6">
           {/* Left Section */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden">
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow overflow-hidden">
-                <img 
-                  src="/src/assets/uchaguzi-logo.png" 
-                  alt="Uchaguzi MFA Logo" 
-                  className="h-8 w-8 object-contain"
-                />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow overflow-hidden bg-slate-950">
+                <img src="/src/assets/uchaguzi-logo.png" alt="Uchaguzi MFA Logo" className="h-8 w-8 object-contain" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-semibold text-foreground">Uchaguzi MFA</h1>
@@ -74,33 +58,24 @@ export default function AdminLayout() {
                   <p className="text-xs text-muted-foreground">{profile?.email || 'admin@uchaguzi-mfa.com'}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => {
-                    // Navigate to profile settings - for now just close
-                    console.log('Navigate to profile settings');
-                  }}
-                >
+                <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                // Navigate to profile settings - for now just close
+                console.log('Navigate to profile settings');
+              }}>
                   <User className="mr-2 h-4 w-4" />
                   Profile Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => {
-                    // Navigate to security settings - for now just close
-                    console.log('Navigate to security settings');
-                  }}
-                >
+                <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                // Navigate to security settings - for now just close
+                console.log('Navigate to security settings');
+              }}>
                   <Shield className="mr-2 h-4 w-4" />
                   Security
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="text-destructive cursor-pointer"
-                  onClick={() => {
-                    supabase.auth.signOut();
-                  }}
-                >
+                <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => {
+                supabase.auth.signOut();
+              }}>
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -122,6 +97,5 @@ export default function AdminLayout() {
       </div>
       
       <Toaster />
-    </div>
-  );
+    </div>;
 }
