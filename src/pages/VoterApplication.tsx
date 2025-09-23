@@ -39,8 +39,10 @@ export default function VoterApplication() {
 
   useEffect(() => {
     fetchElections();
-    fetchApplications();
-  }, [refreshTrigger]);
+    if (user?.id) {
+      fetchApplications();
+    }
+  }, [refreshTrigger, user?.id]);
 
   const fetchElections = async () => {
     try {
@@ -71,10 +73,15 @@ export default function VoterApplication() {
 
   const fetchApplications = async () => {
     try {
+      if (!user?.id) {
+        console.log('No user ID available');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('candidates')
         .select('id, election_id, status, created_at')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setApplications(data || []);

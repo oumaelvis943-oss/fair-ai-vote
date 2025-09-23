@@ -144,6 +144,45 @@ export type Database = {
           },
         ]
       }
+      candidate_interviews: {
+        Row: {
+          ai_feedback: Json | null
+          audio_file_url: string | null
+          candidate_id: string
+          created_at: string
+          election_id: string
+          id: string
+          interview_date: string | null
+          interview_score: number | null
+          transcript: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_feedback?: Json | null
+          audio_file_url?: string | null
+          candidate_id: string
+          created_at?: string
+          election_id: string
+          id?: string
+          interview_date?: string | null
+          interview_score?: number | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_feedback?: Json | null
+          audio_file_url?: string | null
+          candidate_id?: string
+          created_at?: string
+          election_id?: string
+          id?: string
+          interview_date?: string | null
+          interview_score?: number | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       candidates: {
         Row: {
           ai_ranking: number | null
@@ -290,6 +329,8 @@ export type Database = {
       elections: {
         Row: {
           ai_evaluation_enabled: boolean | null
+          auto_end: boolean | null
+          auto_start: boolean | null
           blockchain_verification: boolean | null
           created_at: string
           created_by: string
@@ -301,6 +342,7 @@ export type Database = {
           is_public: boolean | null
           max_candidates: number | null
           positions: Json | null
+          published_at: string | null
           require_approval: boolean | null
           start_date: string
           status: string
@@ -308,9 +350,13 @@ export type Database = {
           updated_at: string
           voter_list_uploaded: boolean | null
           voting_algorithm: string | null
+          voting_ended_at: string | null
+          voting_started_at: string | null
         }
         Insert: {
           ai_evaluation_enabled?: boolean | null
+          auto_end?: boolean | null
+          auto_start?: boolean | null
           blockchain_verification?: boolean | null
           created_at?: string
           created_by: string
@@ -322,6 +368,7 @@ export type Database = {
           is_public?: boolean | null
           max_candidates?: number | null
           positions?: Json | null
+          published_at?: string | null
           require_approval?: boolean | null
           start_date: string
           status?: string
@@ -329,9 +376,13 @@ export type Database = {
           updated_at?: string
           voter_list_uploaded?: boolean | null
           voting_algorithm?: string | null
+          voting_ended_at?: string | null
+          voting_started_at?: string | null
         }
         Update: {
           ai_evaluation_enabled?: boolean | null
+          auto_end?: boolean | null
+          auto_start?: boolean | null
           blockchain_verification?: boolean | null
           created_at?: string
           created_by?: string
@@ -343,6 +394,7 @@ export type Database = {
           is_public?: boolean | null
           max_candidates?: number | null
           positions?: Json | null
+          published_at?: string | null
           require_approval?: boolean | null
           start_date?: string
           status?: string
@@ -350,6 +402,8 @@ export type Database = {
           updated_at?: string
           voter_list_uploaded?: boolean | null
           voting_algorithm?: string | null
+          voting_ended_at?: string | null
+          voting_started_at?: string | null
         }
         Relationships: []
       }
@@ -358,31 +412,52 @@ export type Database = {
           additional_info: Json | null
           created_at: string
           election_id: string
+          eligible_posts: Json | null
           email: string
           full_name: string | null
+          google_email: string | null
+          has_voted: boolean | null
+          house: string | null
           id: string
+          residence: string | null
           updated_at: string
+          voted_at: string | null
           voter_id_number: string | null
+          year_class: string | null
         }
         Insert: {
           additional_info?: Json | null
           created_at?: string
           election_id: string
+          eligible_posts?: Json | null
           email: string
           full_name?: string | null
+          google_email?: string | null
+          has_voted?: boolean | null
+          house?: string | null
           id?: string
+          residence?: string | null
           updated_at?: string
+          voted_at?: string | null
           voter_id_number?: string | null
+          year_class?: string | null
         }
         Update: {
           additional_info?: Json | null
           created_at?: string
           election_id?: string
+          eligible_posts?: Json | null
           email?: string
           full_name?: string | null
+          google_email?: string | null
+          has_voted?: boolean | null
+          house?: string | null
           id?: string
+          residence?: string | null
           updated_at?: string
+          voted_at?: string | null
           voter_id_number?: string | null
+          year_class?: string | null
         }
         Relationships: [
           {
@@ -393,6 +468,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_templates: {
+        Row: {
+          body_html: string
+          body_text: string | null
+          created_at: string
+          id: string
+          subject: string
+          template_name: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          body_html: string
+          body_text?: string | null
+          created_at?: string
+          id?: string
+          subject: string
+          template_name: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          body_html?: string
+          body_text?: string | null
+          created_at?: string
+          id?: string
+          subject?: string
+          template_name?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: []
       }
       encrypted_votes: {
         Row: {
@@ -507,6 +615,45 @@ export type Database = {
         }
         Relationships: []
       }
+      smtp_config: {
+        Row: {
+          created_at: string
+          from_email: string
+          from_name: string | null
+          host: string
+          id: string
+          is_active: boolean | null
+          password: string
+          port: number
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          from_email: string
+          from_name?: string | null
+          host: string
+          id?: string
+          is_active?: boolean | null
+          password: string
+          port?: number
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          from_email?: string
+          from_name?: string | null
+          host?: string
+          id?: string
+          is_active?: boolean | null
+          password?: string
+          port?: number
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
       user_verification: {
         Row: {
           created_at: string | null
@@ -614,6 +761,39 @@ export type Database = {
         }
         Relationships: []
       }
+      vote_submissions: {
+        Row: {
+          created_at: string
+          election_id: string
+          id: string
+          ip_address: string | null
+          submission_hash: string
+          user_agent: string | null
+          voter_email: string
+          voter_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          election_id: string
+          id?: string
+          ip_address?: string | null
+          submission_hash: string
+          user_agent?: string | null
+          voter_email: string
+          voter_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          election_id?: string
+          id?: string
+          ip_address?: string | null
+          submission_hash?: string
+          user_agent?: string | null
+          voter_email?: string
+          voter_id?: string | null
+        }
+        Relationships: []
+      }
       votes: {
         Row: {
           candidate_id: string
@@ -664,6 +844,10 @@ export type Database = {
       calculate_candidate_ai_score: {
         Args: { candidate_uuid: string }
         Returns: number
+      }
+      check_voting_eligibility: {
+        Args: { p_election_id: string; p_voter_email: string }
+        Returns: Json
       }
       get_latest_block: {
         Args: Record<PropertyKey, never>

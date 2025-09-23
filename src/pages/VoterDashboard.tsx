@@ -35,8 +35,10 @@ export default function VoterDashboard() {
 
   useEffect(() => {
     fetchElections();
-    fetchApplications();
-  }, []);
+    if (user?.id) {
+      fetchApplications();
+    }
+  }, [user?.id]);
 
   const fetchElections = async () => {
     try {
@@ -61,10 +63,15 @@ export default function VoterDashboard() {
 
   const fetchApplications = async () => {
     try {
+      if (!user?.id) {
+        console.log('No user ID available');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('candidates')
         .select('id, election_id, status, created_at')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setApplications(data || []);
