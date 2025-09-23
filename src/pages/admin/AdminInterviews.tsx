@@ -12,6 +12,7 @@ interface Candidate {
   user_id: string;
   position: string;
   status: string;
+  election_id: string;
   profiles: {
     full_name: string;
     email: string;
