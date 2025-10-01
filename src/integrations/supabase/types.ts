@@ -191,6 +191,7 @@ export type Database = {
           created_at: string
           election_id: string
           evaluation_data: Json | null
+          form_responses: Json | null
           id: string
           platform_statement: string | null
           position: string | null
@@ -206,6 +207,7 @@ export type Database = {
           created_at?: string
           election_id: string
           evaluation_data?: Json | null
+          form_responses?: Json | null
           id?: string
           platform_statement?: string | null
           position?: string | null
@@ -221,6 +223,7 @@ export type Database = {
           created_at?: string
           election_id?: string
           evaluation_data?: Json | null
+          form_responses?: Json | null
           id?: string
           platform_statement?: string | null
           position?: string | null
@@ -329,6 +332,7 @@ export type Database = {
       elections: {
         Row: {
           ai_evaluation_enabled: boolean | null
+          application_form_fields: Json | null
           auto_end: boolean | null
           auto_start: boolean | null
           blockchain_verification: boolean | null
@@ -355,6 +359,7 @@ export type Database = {
         }
         Insert: {
           ai_evaluation_enabled?: boolean | null
+          application_form_fields?: Json | null
           auto_end?: boolean | null
           auto_start?: boolean | null
           blockchain_verification?: boolean | null
@@ -381,6 +386,7 @@ export type Database = {
         }
         Update: {
           ai_evaluation_enabled?: boolean | null
+          application_form_fields?: Json | null
           auto_end?: boolean | null
           auto_start?: boolean | null
           blockchain_verification?: boolean | null

@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Clock, Users, Vote, Settings, Plus, X, Save } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ApplicationFormBuilder, { FormField } from './ApplicationFormBuilder';
 
 type VotingAlgorithm = 'fptp' | 'borda_count' | 'ranked_choice';
 
@@ -24,6 +26,7 @@ interface Election {
   is_public: boolean;
   positions: string[];
   status: string;
+  application_form_fields?: any;
 }
 
 interface EditElectionFormProps {
@@ -46,6 +49,9 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
     is_public: election.is_public,
     positions: election.positions?.length ? election.positions : ['']
   });
+  const [applicationFormFields, setApplicationFormFields] = useState<FormField[]>(
+    election.application_form_fields || []
+  );
 
   const votingAlgorithms = [
     {
@@ -84,7 +90,8 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
           max_candidates: formData.max_candidates,
           require_approval: formData.require_approval,
           is_public: formData.is_public,
-          positions: formData.positions.filter(p => p.trim())
+          positions: formData.positions.filter(p => p.trim()),
+          application_form_fields: applicationFormFields as any
         })
         .eq('id', election.id);
 
@@ -122,7 +129,14 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <Tabs defaultValue="basic" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="basic">Basic Settings</TabsTrigger>
+            <TabsTrigger value="form">Application Form</TabsTrigger>
+          </TabsList>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <TabsContent value="basic" className="space-y-6 mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">Election Title</Label>
@@ -291,6 +305,14 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
               </Label>
             </div>
           </div>
+            </TabsContent>
+
+            <TabsContent value="form" className="space-y-6 mt-0">
+              <ApplicationFormBuilder
+                fields={applicationFormFields}
+                onChange={setApplicationFormFields}
+              />
+            </TabsContent>
 
           <div className="flex gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
@@ -302,6 +324,7 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
             </Button>
           </div>
         </form>
+        </Tabs>
       </CardContent>
     </Card>
   );

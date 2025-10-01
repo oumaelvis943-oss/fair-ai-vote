@@ -11,6 +11,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Send, Vote, Users, Calendar } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import DynamicFormField from './DynamicFormField';
+import { FormField } from '@/components/admin/ApplicationFormBuilder';
 
 interface Election {
   id: string;
@@ -20,6 +22,7 @@ interface Election {
   start_date: string;
   end_date: string;
   positions?: any;
+  application_form_fields?: FormField[];
 }
 
 interface VoterApplicationFormProps {
@@ -35,27 +38,49 @@ export default function VoterApplicationForm({
 }: VoterApplicationFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [platformStatement, setPlatformStatement] = useState('');
   const [selectedPosition, setSelectedPosition] = useState('');
+  const [formResponses, setFormResponses] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const customFields = election.application_form_fields || [];
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!platformStatement.trim()) {
-      toast({
-        title: "Platform Statement Required",
-        description: "Please provide your platform statement",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Validate position
     const positions = Array.isArray(election.positions) ? election.positions : [];
     if (positions.length > 0 && !selectedPosition) {
       toast({
         title: "Position Required",
         description: "Please select a position you're applying for",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate custom fields
+    const newErrors: Record<string, string> = {};
+    customFields.forEach(field => {
+      if (field.required && !formResponses[field.id]) {
+        newErrors[field.id] = `${field.label} is required`;
+      }
+      if (field.type === 'textarea' && formResponses[field.id]) {
+        const text = formResponses[field.id];
+        if (field.validation?.minLength && text.length < field.validation.minLength) {
+          newErrors[field.id] = `Minimum ${field.validation.minLength} characters required`;
+        }
+        if (field.validation?.maxLength && text.length > field.validation.maxLength) {
+          newErrors[field.id] = `Maximum ${field.validation.maxLength} characters allowed`;
+        }
+      }
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields correctly",
         variant: "destructive",
       });
       return;
@@ -91,8 +116,8 @@ export default function VoterApplicationForm({
         .insert({
           user_id: user?.id,
           election_id: election.id,
-          platform_statement: platformStatement,
           position: selectedPosition || null,
+          form_responses: formResponses,
           status: 'pending'
         });
 
@@ -196,7 +221,7 @@ export default function VoterApplicationForm({
               {/* Position Selection */}
               {Array.isArray(election.positions) && election.positions.length > 0 && (
                 <div className="space-y-2">
-                  <Label htmlFor="position">Position</Label>
+                  <Label htmlFor="position">Position <span className="text-destructive">*</span></Label>
                   <Select value={selectedPosition} onValueChange={setSelectedPosition}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select the position you're applying for" />
@@ -212,27 +237,41 @@ export default function VoterApplicationForm({
                 </div>
               )}
 
-              {/* Platform Statement */}
-              <div className="space-y-2">
-                <Label htmlFor="platform">Platform Statement *</Label>
-                <Textarea
-                  id="platform"
-                  placeholder="Describe your qualifications, goals, and why you would be a good candidate for this position..."
-                  value={platformStatement}
-                  onChange={(e) => setPlatformStatement(e.target.value)}
-                  className="min-h-[200px] resize-y"
-                  required
-                />
-                <p className="text-sm text-muted-foreground">
-                  {platformStatement.length} characters (minimum 100 recommended)
-                </p>
-              </div>
+              {/* Custom Form Fields */}
+              {customFields.length > 0 ? (
+                customFields.map((field) => (
+                  <DynamicFormField
+                    key={field.id}
+                    field={field}
+                    value={formResponses[field.id]}
+                    onChange={(value) => {
+                      setFormResponses({ ...formResponses, [field.id]: value });
+                      if (errors[field.id]) {
+                        setErrors({ ...errors, [field.id]: '' });
+                      }
+                    }}
+                    error={errors[field.id]}
+                  />
+                ))
+              ) : (
+                <div className="p-6 border border-dashed rounded-lg text-center text-muted-foreground">
+                  <p>No additional application fields configured for this election.</p>
+                  <p className="text-sm mt-1">Select a position above to continue.</p>
+                </div>
+              )}
 
               {/* Submit Button */}
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={onBack}
+                >
+                  Cancel
+                </Button>
                 <Button 
                   type="submit" 
-                  disabled={submitting || !platformStatement.trim()}
+                  disabled={submitting}
                   className="btn-primary-gradient gap-2"
                 >
                   {submitting ? (
