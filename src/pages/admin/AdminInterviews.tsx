@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Brain, User, Calendar } from 'lucide-react';
 import AIInterviewSystem from '@/components/interviews/AIInterviewSystem';
+import BulkEmailSender from '@/components/admin/BulkEmailSender';
 
 interface Candidate {
   id: string;
@@ -102,6 +103,8 @@ export default function AdminInterviews() {
     );
   }
 
+  const electionId = candidates[0]?.election_id;
+
   return (
     <div className="space-y-6">
       <div className="mb-8">
@@ -110,6 +113,10 @@ export default function AdminInterviews() {
           Conduct AI-powered interviews with approved candidates
         </p>
       </div>
+
+      {candidates.length > 0 && (
+        <BulkEmailSender electionId={electionId} candidates={candidates} />
+      )}
 
       {loading ? (
         <div className="grid gap-4">

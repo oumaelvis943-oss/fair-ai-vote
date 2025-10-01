@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Vote, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import GoogleVotingInterface from '@/components/voting/GoogleVotingInterface';
+import VotingStatusBanner from '@/components/voting/VotingStatusBanner';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface Election {
@@ -170,6 +171,8 @@ export default function VotingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4">
       <div className="container mx-auto max-w-4xl space-y-6">
+        <VotingStatusBanner election={election} />
+        
         {/* Header */}
         <Card className="card-shadow">
           <CardHeader className="text-center">
@@ -186,40 +189,11 @@ export default function VotingPage() {
               </p>
             )}
           </CardHeader>
-          <CardContent>
-            {votingStatus && (
-              <Alert className={votingStatus.type === 'active' ? '' : 'border-destructive'}>
-                {votingStatus.icon}
-                <AlertDescription>
-                  {votingStatus.message}
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
         </Card>
 
         {/* Voting Interface */}
-        {isVotingActive() ? (
+        {isVotingActive() && (
           <GoogleVotingInterface election={election} />
-        ) : (
-          <Card className="card-shadow">
-            <CardHeader className="text-center">
-              <CardTitle className="text-destructive">
-                Voting Currently Unavailable
-              </CardTitle>
-              <CardDescription>
-                This election is not currently accepting votes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {votingStatus?.message || 'Voting is not available at this time.'}
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
         )}
       </div>
     </div>

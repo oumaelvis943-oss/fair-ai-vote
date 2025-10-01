@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import ElectionsList from '@/components/admin/ElectionsList';
 import EditElectionForm from '@/components/admin/EditElectionForm';
+import ElectionScheduler from '@/components/admin/ElectionScheduler';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Election {
   id: string;
@@ -15,6 +17,8 @@ interface Election {
   is_public: boolean;
   positions: string[];
   status: string;
+  auto_start?: boolean;
+  auto_end?: boolean;
 }
 
 export default function AdminElections() {
@@ -50,11 +54,27 @@ export default function AdminElections() {
             <DialogTitle>Edit Election</DialogTitle>
           </DialogHeader>
           {editingElection && (
-            <EditElectionForm
-              election={editingElection}
-              onElectionUpdated={handleElectionUpdated}
-              onClose={() => setEditingElection(null)}
-            />
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="details">Election Details</TabsTrigger>
+                <TabsTrigger value="schedule">Scheduling</TabsTrigger>
+              </TabsList>
+              <TabsContent value="details">
+                <EditElectionForm
+                  election={editingElection}
+                  onElectionUpdated={handleElectionUpdated}
+                  onClose={() => setEditingElection(null)}
+                />
+              </TabsContent>
+              <TabsContent value="schedule">
+                <ElectionScheduler
+                  electionId={editingElection.id}
+                  currentAutoStart={editingElection.auto_start || false}
+                  currentAutoEnd={editingElection.auto_end || false}
+                  onUpdate={handleElectionUpdated}
+                />
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>

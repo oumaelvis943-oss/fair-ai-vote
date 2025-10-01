@@ -69,6 +69,21 @@ verify_jwt = true
 [functions.verify-vote]
 verify_jwt = false
 
+[functions.send-notification-emails]
+verify_jwt = true
+
+[functions.process-interview]
+verify_jwt = true
+
+[functions.submit-votes]
+verify_jwt = false
+
+[functions.check-voting-eligibility]
+verify_jwt = false
+
+[functions.schedule-elections]
+verify_jwt = false
+
 [edge-runtime]
 policy = "per_worker"
 inspector_port = 8083

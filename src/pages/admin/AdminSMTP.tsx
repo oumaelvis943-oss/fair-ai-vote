@@ -41,14 +41,23 @@ export default function AdminSMTP() {
 
   const fetchSMTPConfig = async () => {
     try {
-      // Skip for now since table might not be available
-      setLoading(false);
+      const { data, error } = await supabase
+        .from('smtp_config')
+        .select('*')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setConfig(data);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch SMTP configuration.",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -56,14 +65,33 @@ export default function AdminSMTP() {
   const saveSMTPConfig = async () => {
     setSaving(true);
     try {
+      const { data: existingConfig } = await supabase
+        .from('smtp_config')
+        .select('id')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (existingConfig) {
+        const { error } = await supabase
+          .from('smtp_config')
+          .update(config)
+          .eq('id', existingConfig.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('smtp_config')
+          .insert(config);
+        if (error) throw error;
+      }
+      
       toast({
-        title: "SMTP Configuration Saved",
-        description: "Configuration saved locally. Database integration pending.",
+        title: "Success",
+        description: "SMTP configuration saved successfully.",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to save SMTP configuration.",
         variant: "destructive",
       });
     } finally {
