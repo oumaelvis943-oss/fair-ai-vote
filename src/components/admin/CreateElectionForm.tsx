@@ -23,6 +23,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('basic');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -63,6 +64,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
 
     // Validate required fields
     if (!formData.title || !formData.start_date || !formData.end_date || !formData.voting_algorithm) {
+      setActiveTab('basic'); // Switch to Basic Settings tab
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields in Basic Settings tab (Title, Start Date, End Date, Voting Algorithm).",
@@ -137,7 +139,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="basic" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">Basic Settings</TabsTrigger>
             <TabsTrigger value="form">Application Form</TabsTrigger>
