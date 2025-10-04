@@ -7,11 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, Users, Vote, Settings, Plus, X } from 'lucide-react';
+import { Calendar, Clock, Users, Vote, Settings } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ApplicationFormBuilder, { FormField } from './ApplicationFormBuilder';
+import PositionFormBuilder, { PositionWithForm } from './PositionFormBuilder';
 
 type VotingAlgorithm = 'fptp' | 'borda_count' | 'ranked_choice';
 
@@ -32,10 +31,11 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
     voting_algorithm: '' as VotingAlgorithm,
     max_candidates: 10,
     require_approval: true,
-    is_public: false,
-    positions: ['']
+    is_public: false
   });
-  const [applicationFormFields, setApplicationFormFields] = useState<FormField[]>([]);
+  const [positions, setPositions] = useState<PositionWithForm[]>([
+    { name: '', application_form_fields: [] }
+  ]);
 
   const votingAlgorithms = [
     {
@@ -64,10 +64,22 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
 
     // Validate required fields
     if (!formData.title || !formData.start_date || !formData.end_date || !formData.voting_algorithm) {
-      setActiveTab('basic'); // Switch to Basic Settings tab
+      setActiveTab('basic');
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields in Basic Settings tab (Title, Start Date, End Date, Voting Algorithm).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate positions
+    const hasEmptyPositions = positions.some(p => !p.name.trim());
+    if (hasEmptyPositions) {
+      setActiveTab('positions');
+      toast({
+        title: "Validation Error",
+        description: "Please provide names for all positions.",
         variant: "destructive",
       });
       return;
@@ -86,8 +98,8 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
           max_candidates: formData.max_candidates,
           require_approval: formData.require_approval,
           is_public: formData.is_public,
-          positions: formData.positions.filter(p => p.trim()),
-          application_form_fields: applicationFormFields as any,
+          positions: positions as any,
+          application_form_fields: null,
           created_by: user.id,
           status: 'draft'
         });
@@ -108,10 +120,9 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         voting_algorithm: '' as VotingAlgorithm,
         max_candidates: 10,
         require_approval: true,
-        is_public: false,
-        positions: ['']
+        is_public: false
       });
-      setApplicationFormFields([]);
+      setPositions([{ name: '', application_form_fields: [] }]);
 
       onElectionCreated();
     } catch (error: any) {
@@ -142,7 +153,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">Basic Settings</TabsTrigger>
-            <TabsTrigger value="form">Application Form</TabsTrigger>
+            <TabsTrigger value="positions">Positions & Forms</TabsTrigger>
           </TabsList>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -246,46 +257,6 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
           </div>
 
           <div className="space-y-3">
-            <Label>Election Positions</Label>
-            {formData.positions.map((position, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={position}
-                  onChange={(e) => {
-                    const newPositions = [...formData.positions];
-                    newPositions[index] = e.target.value;
-                    setFormData({ ...formData, positions: newPositions });
-                  }}
-                  placeholder={`Position ${index + 1} (e.g., President, Vice President)`}
-                />
-                {formData.positions.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newPositions = formData.positions.filter((_, i) => i !== index);
-                      setFormData({ ...formData, positions: newPositions });
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setFormData({ ...formData, positions: [...formData.positions, ''] })}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Position
-            </Button>
-          </div>
-
-          <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -314,10 +285,10 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
           </div>
             </TabsContent>
 
-            <TabsContent value="form" className="space-y-6 mt-0">
-              <ApplicationFormBuilder
-                fields={applicationFormFields}
-                onChange={setApplicationFormFields}
+            <TabsContent value="positions" className="space-y-6 mt-0">
+              <PositionFormBuilder
+                positions={positions}
+                onChange={setPositions}
               />
             </TabsContent>
 

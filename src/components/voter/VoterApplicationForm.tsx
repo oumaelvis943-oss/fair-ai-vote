@@ -42,8 +42,29 @@ export default function VoterApplicationForm({
   const [formResponses, setFormResponses] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [customFields, setCustomFields] = useState<FormField[]>([]);
 
-  const customFields = election.application_form_fields || [];
+  // Load position-specific form fields when position is selected
+  useEffect(() => {
+    if (selectedPosition && election?.positions) {
+      const positions = election.positions as any[];
+      const positionData = positions.find((p: any) => 
+        typeof p === 'string' ? p === selectedPosition : p.name === selectedPosition
+      );
+      
+      if (positionData && typeof positionData === 'object' && positionData.application_form_fields) {
+        setCustomFields(positionData.application_form_fields);
+      } else {
+        // Fallback to election-wide form fields for backward compatibility
+        setCustomFields(election.application_form_fields || []);
+      }
+      setFormResponses({});
+      setErrors({});
+    } else {
+      setCustomFields([]);
+      setFormResponses({});
+    }
+  }, [selectedPosition, election]);
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,11 +248,14 @@ export default function VoterApplicationForm({
                       <SelectValue placeholder="Select the position you're applying for" />
                     </SelectTrigger>
                     <SelectContent>
-                      {election.positions.map((position) => (
-                        <SelectItem key={position} value={position}>
-                          {position}
-                        </SelectItem>
-                      ))}
+                      {(election.positions as any[]).map((position) => {
+                        const positionName = typeof position === 'string' ? position : position.name;
+                        return (
+                          <SelectItem key={positionName} value={positionName}>
+                            {positionName}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
