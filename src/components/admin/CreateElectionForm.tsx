@@ -61,6 +61,16 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
     e.preventDefault();
     if (!user) return;
 
+    // Validate required fields
+    if (!formData.title || !formData.start_date || !formData.end_date || !formData.voting_algorithm) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields in Basic Settings tab (Title, Start Date, End Date, Voting Algorithm).",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -68,8 +78,8 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         .insert({
           title: formData.title,
           description: formData.description,
-          start_date: formData.start_date || null,
-          end_date: formData.end_date || null,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
           voting_algorithm: formData.voting_algorithm,
           max_candidates: formData.max_candidates,
           require_approval: formData.require_approval,
