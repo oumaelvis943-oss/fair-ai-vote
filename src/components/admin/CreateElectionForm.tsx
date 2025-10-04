@@ -68,8 +68,8 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         .insert({
           title: formData.title,
           description: formData.description,
-          start_date: formData.start_date,
-          end_date: formData.end_date,
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
           voting_algorithm: formData.voting_algorithm,
           max_candidates: formData.max_candidates,
           require_approval: formData.require_approval,
