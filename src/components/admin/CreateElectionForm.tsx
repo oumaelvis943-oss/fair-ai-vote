@@ -74,7 +74,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
     }
 
     // Validate positions
-    const hasEmptyPositions = positions.some(p => !p.name.trim());
+    const hasEmptyPositions = positions.some(p => !p.name || !p.name.trim());
     if (hasEmptyPositions) {
       setActiveTab('positions');
       toast({

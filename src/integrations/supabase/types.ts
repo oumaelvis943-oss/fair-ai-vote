@@ -339,6 +339,7 @@ export type Database = {
           created_at: string
           created_by: string
           custom_form_schema: Json | null
+          deleted_at: string | null
           description: string | null
           eligibility_criteria: Json | null
           end_date: string
@@ -366,6 +367,7 @@ export type Database = {
           created_at?: string
           created_by: string
           custom_form_schema?: Json | null
+          deleted_at?: string | null
           description?: string | null
           eligibility_criteria?: Json | null
           end_date: string
@@ -393,6 +395,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           custom_form_schema?: Json | null
+          deleted_at?: string | null
           description?: string | null
           eligibility_criteria?: Json | null
           end_date?: string
@@ -868,6 +871,10 @@ export type Database = {
           timestamp: string
           votes_count: number
         }
+      }
+      update_election_status: {
+        Args: { p_election_id: string; p_new_status: string }
+        Returns: undefined
       }
     }
     Enums: {

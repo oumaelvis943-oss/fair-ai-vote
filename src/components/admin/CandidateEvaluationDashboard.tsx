@@ -14,6 +14,8 @@ interface Candidate {
   election_id: string;
   status: string;
   platform_statement: string | null;
+  position: string | null;
+  form_responses: any;
   created_at: string;
   updated_at: string;
   profile?: {
@@ -281,6 +283,13 @@ export default function CandidateEvaluationDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                {candidate.position && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Position</p>
+                    <Badge variant="secondary">{candidate.position}</Badge>
+                  </div>
+                )}
+
                 {candidate.platform_statement && (
                   <div>
                     <h4 className="font-medium mb-2 flex items-center gap-2">
@@ -289,6 +298,27 @@ export default function CandidateEvaluationDashboard() {
                     </h4>
                     <div className="p-3 bg-muted/50 rounded-lg text-sm">
                       {candidate.platform_statement}
+                    </div>
+                  </div>
+                )}
+
+                {candidate.form_responses && Object.keys(candidate.form_responses).length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      Application Responses
+                    </h4>
+                    <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
+                      {Object.entries(candidate.form_responses).map(([key, value]) => (
+                        <div key={key} className="border-b border-border/50 pb-2 last:border-0">
+                          <p className="text-sm font-medium capitalize mb-1">
+                            {key.replace(/_/g, ' ')}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

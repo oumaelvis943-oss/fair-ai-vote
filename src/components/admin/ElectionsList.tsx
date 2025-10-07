@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, Users, Vote, Settings, Play, Pause, Eye, Trash2, Edit, Bell } from 'lucide-react';
+import { Calendar, Clock, Users, Vote, Settings, Play, Pause, Eye, Trash2, Edit, Bell, PlayCircle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface Election {
@@ -13,7 +14,7 @@ interface Election {
   description: string | null;
   start_date: string;
   end_date: string;
-  status: 'draft' | 'active' | 'completed';
+  status: 'draft' | 'active' | 'completed' | 'paused';
   voting_algorithm: 'fptp' | 'borda_count' | 'ranked_choice';
   max_candidates: number;
   require_approval: boolean;
@@ -53,7 +54,7 @@ export default function ElectionsList({ refreshTrigger, onEditElection }: Electi
         description: election.description,
         start_date: election.start_date,
         end_date: election.end_date,
-        status: election.status as 'draft' | 'active' | 'completed',
+        status: election.status as 'draft' | 'active' | 'completed' | 'paused',
         voting_algorithm: (election.voting_algorithm || 'fptp') as 'fptp' | 'borda_count' | 'ranked_choice',
         max_candidates: election.max_candidates || 10,
         require_approval: election.require_approval ?? true,
@@ -80,7 +81,7 @@ export default function ElectionsList({ refreshTrigger, onEditElection }: Electi
     fetchElections();
   }, [refreshTrigger]);
 
-  const updateElectionStatus = async (electionId: string, newStatus: 'active' | 'completed') => {
+  const updateElectionStatus = async (electionId: string, newStatus: 'draft' | 'active' | 'completed' | 'paused') => {
     try {
       const { error } = await supabase
         .from('elections')
@@ -89,9 +90,16 @@ export default function ElectionsList({ refreshTrigger, onEditElection }: Electi
 
       if (error) throw error;
 
+      const statusMessages = {
+        draft: 'reverted to draft',
+        active: 'activated',
+        completed: 'completed',
+        paused: 'paused'
+      };
+
       toast({
         title: "Election Updated",
-        description: `Election ${newStatus === 'active' ? 'activated' : 'completed'} successfully.`,
+        description: `Election ${statusMessages[newStatus]} successfully.`,
       });
 
       fetchElections();
@@ -105,21 +113,17 @@ export default function ElectionsList({ refreshTrigger, onEditElection }: Electi
   };
 
   const deleteElection = async (electionId: string) => {
-    if (!confirm('Are you sure you want to delete this election? This action cannot be undone.')) {
-      return;
-    }
-
     try {
       const { error } = await supabase
         .from('elections')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', electionId);
 
       if (error) throw error;
 
       toast({
         title: "Election Deleted",
-        description: "Election has been permanently deleted.",
+        description: "Election has been successfully deleted.",
       });
 
       fetchElections();
@@ -175,6 +179,7 @@ export default function ElectionsList({ refreshTrigger, onEditElection }: Electi
       case 'draft': return 'secondary';
       case 'active': return 'default';
       case 'completed': return 'outline';
+      case 'paused': return 'destructive';
       default: return 'secondary';
     }
   };
@@ -263,14 +268,47 @@ export default function ElectionsList({ refreshTrigger, onEditElection }: Electi
                     </Button>
                   )}
                   {election.status === 'active' && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateElectionStatus(election.id, 'paused')}
+                        className="flex items-center gap-1"
+                      >
+                        <Pause className="h-3 w-3" />
+                        Pause
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateElectionStatus(election.id, 'completed')}
+                        className="flex items-center gap-1"
+                      >
+                        <Clock className="h-3 w-3" />
+                        Complete
+                      </Button>
+                    </>
+                  )}
+                  {election.status === 'paused' && (
                     <Button
                       size="sm"
-                      variant="outline"
-                      onClick={() => updateElectionStatus(election.id, 'completed')}
+                      variant="default"
+                      onClick={() => updateElectionStatus(election.id, 'active')}
                       className="flex items-center gap-1"
                     >
-                      <Pause className="h-3 w-3" />
-                      Complete
+                      <PlayCircle className="h-3 w-3" />
+                      Reactivate
+                    </Button>
+                  )}
+                  {election.status === 'completed' && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => updateElectionStatus(election.id, 'active')}
+                      className="flex items-center gap-1"
+                    >
+                      <PlayCircle className="h-3 w-3" />
+                      Reactivate
                     </Button>
                   )}
                   {election.status === 'draft' && onEditElection && (
@@ -295,25 +333,32 @@ export default function ElectionsList({ refreshTrigger, onEditElection }: Electi
                       Notify Voters
                     </Button>
                   )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex items-center gap-1"
-                  >
-                    <Eye className="h-3 w-3" />
-                    View
-                  </Button>
-                  {election.status === 'draft' && (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => deleteElection(election.id)}
-                      className="flex items-center gap-1"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                      Delete
-                    </Button>
-                  )}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="flex items-center gap-1"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Election</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{election.title}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteElection(election.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardHeader>
