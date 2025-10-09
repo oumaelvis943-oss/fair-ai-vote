@@ -11,7 +11,7 @@ import { Shield, User, Key, Save, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function SettingsPage() {
-  const { profile, user, updateProfile, signOut } = useAuth();
+  const { profile, user, role, updateProfile, signOut } = useAuth();
   const { toast } = useToast();
   
   const [fullName, setFullName] = useState(profile?.full_name || '');
@@ -178,7 +178,7 @@ export default function SettingsPage() {
                 <Label>Role</Label>
                 <div className="px-3 py-2 bg-muted rounded-md">
                   <span className="text-sm font-medium capitalize">
-                    {profile?.role || 'Unknown'}
+                    {role || 'Unknown'}
                   </span>
                 </div>
               </div>

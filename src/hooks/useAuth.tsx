@@ -7,15 +7,19 @@ interface Profile {
   user_id: string;
   email: string;
   full_name: string | null;
-  role: 'admin' | 'candidate' | 'voter';
   created_at: string;
   updated_at: string;
+}
+
+interface UserRole {
+  role: 'admin' | 'candidate' | 'voter';
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  role: 'admin' | 'candidate' | 'voter' | null;
   loading: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -29,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [role, setRole] = useState<'admin' | 'candidate' | 'voter' | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 0);
         } else {
           setProfile(null);
+          setRole(null);
         }
         setLoading(false);
       }
@@ -77,19 +83,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
         return;
       }
 
-      if (data) {
-        setProfile(data as Profile);
+      if (profileData) {
+        setProfile(profileData as Profile);
+      }
+
+      // Fetch user role using direct query (types will update after migration)
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles' as any)
+        .select('role')
+        .eq('user_id', userId)
+        .order('role', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (roleError) {
+        console.error('Error fetching role:', roleError);
+        return;
+      }
+
+      if (roleData) {
+        setRole((roleData as any).role as 'admin' | 'candidate' | 'voter');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -145,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     profile,
+    role,
     loading,
     signUp,
     signIn,

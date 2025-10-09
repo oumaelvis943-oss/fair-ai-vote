@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 export default function Dashboard() {
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, role, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'settings'>('dashboard');
 
@@ -32,13 +32,13 @@ export default function Dashboard() {
   }
 
   // If user is admin, redirect to admin dashboard
-  if (profile?.role === 'admin') {
+  if (role === 'admin') {
     navigate('/admin');
     return null;
   }
 
   // If user is voter, redirect to voter dashboard
-  if (profile?.role === 'voter') {
+  if (role === 'voter') {
     navigate('/voter');
     return null;
   }
