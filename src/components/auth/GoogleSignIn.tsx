@@ -23,6 +23,7 @@ export default function GoogleSignIn({ onSignInSuccess, disabled }: GoogleSignIn
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
+            hd: 'mpesafoundationacademy.ac.ke',
           },
         },
       });

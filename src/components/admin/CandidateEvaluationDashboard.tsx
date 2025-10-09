@@ -16,6 +16,9 @@ interface Candidate {
   platform_statement: string | null;
   position: string | null;
   form_responses: any;
+  ai_score: number | null;
+  ai_ranking: number | null;
+  evaluation_data: any;
   created_at: string;
   updated_at: string;
   profile?: {
@@ -319,6 +322,46 @@ export default function CandidateEvaluationDashboard() {
                           </p>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {(candidate.ai_score || candidate.evaluation_data) && (
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      AI Evaluation
+                    </h4>
+                    <div className="space-y-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                      {candidate.ai_score && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">AI Score</span>
+                          <Badge variant="secondary" className="text-lg">
+                            {candidate.ai_score.toFixed(1)}/100
+                          </Badge>
+                        </div>
+                      )}
+                      {candidate.ai_ranking && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">AI Ranking</span>
+                          <Badge variant="outline">
+                            #{candidate.ai_ranking}
+                          </Badge>
+                        </div>
+                      )}
+                      {candidate.evaluation_data && Object.keys(candidate.evaluation_data).length > 0 && (
+                        <div className="border-t border-yellow-200 dark:border-yellow-800 pt-2 mt-2">
+                          <p className="text-xs font-medium mb-2">AI Recommendations:</p>
+                          {Object.entries(candidate.evaluation_data).map(([key, value]) => (
+                            <div key={key} className="text-xs mb-1">
+                              <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>{' '}
+                              <span className="text-muted-foreground">
+                                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

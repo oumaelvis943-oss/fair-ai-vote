@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserCheck, FileText, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import DynamicFormField from './DynamicFormField';
 
 interface Election {
   id: string;
@@ -20,7 +21,7 @@ interface Election {
   end_date: string;
   max_candidates: number;
   is_public: boolean;
-  positions?: string[];
+  positions?: any[];
 }
 
 interface CandidateApplicationFormProps {
@@ -40,6 +41,16 @@ export default function CandidateApplicationForm({
   const [platformStatement, setPlatformStatement] = useState('');
   const [selectedPosition, setSelectedPosition] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [selectedPositionData, setSelectedPositionData] = useState<any>(null);
+
+  useEffect(() => {
+    if (selectedPosition && election.positions) {
+      const posData = election.positions.find((p: any) => p.name === selectedPosition);
+      setSelectedPositionData(posData);
+      setFormData({});
+    }
+  }, [selectedPosition, election.positions]);
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +71,21 @@ export default function CandidateApplicationForm({
         variant: "destructive",
       });
       return;
+    }
+
+    // Validate position-specific form fields
+    if (selectedPositionData?.formFields) {
+      const missingRequired = selectedPositionData.formFields.filter(
+        (field: any) => field.required && !formData[field.id]
+      );
+      if (missingRequired.length > 0) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     if (platformStatement.length < 100) {
@@ -99,6 +125,7 @@ export default function CandidateApplicationForm({
           election_id: election.id,
           platform_statement: platformStatement,
           position: election.positions && election.positions.length > 0 ? selectedPosition : null,
+          form_responses: formData,
           status: 'pending'
         });
 
@@ -206,13 +233,29 @@ export default function CandidateApplicationForm({
                     <SelectValue placeholder="Select a position to apply for" />
                   </SelectTrigger>
                   <SelectContent>
-                    {election.positions.map((position) => (
-                      <SelectItem key={position} value={position}>
-                        {position}
+                    {election.positions.map((position: any) => (
+                      <SelectItem key={position.name} value={position.name}>
+                        {position.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            )}
+
+            {selectedPositionData?.formFields && selectedPositionData.formFields.length > 0 && (
+              <div className="space-y-4">
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold mb-4">Position-Specific Application Fields</h3>
+                  {selectedPositionData.formFields.map((field: any) => (
+                    <DynamicFormField
+                      key={field.id}
+                      field={field}
+                      value={formData[field.id]}
+                      onChange={(value) => setFormData(prev => ({ ...prev, [field.id]: value }))}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
