@@ -20,6 +20,7 @@ import AdminAudit from "./pages/admin/AdminAudit";
 import AdminSettingsPage from "./pages/admin/AdminSettings";
 import VoterApplication from "./pages/VoterApplication";
 import VoterDashboard from "./pages/VoterDashboard";
+import VotingPage from "./pages/VotingPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/admin-setup" element={<InitialAdminSetup />} />
             <Route path="/apply" element={<VoterApplication />} />
             <Route path="/voter" element={<VoterDashboard />} />
+            <Route path="/vote/:electionId" element={<VotingPage />} />
             
             {/* Admin Routes with Sidebar Layout */}
             <Route path="/admin" element={<AdminLayout />}>
