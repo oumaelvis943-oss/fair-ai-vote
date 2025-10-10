@@ -34,7 +34,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
     is_public: false
   });
   const [positions, setPositions] = useState<PositionWithForm[]>([
-    { name: '', application_form_fields: [] }
+    { name: '', slots: 1, sub_categories: [], application_form_fields: [] }
   ]);
 
   const votingAlgorithms = [
@@ -122,7 +122,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         require_approval: true,
         is_public: false
       });
-      setPositions([{ name: '', application_form_fields: [] }]);
+      setPositions([{ name: '', slots: 1, sub_categories: [], application_form_fields: [] }]);
 
       onElectionCreated();
     } catch (error: any) {
