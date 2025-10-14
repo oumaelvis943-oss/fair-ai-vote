@@ -149,7 +149,7 @@ export default function VoterListUpload({ electionId, onUploadComplete }: VoterL
   };
 
   const downloadTemplate = () => {
-    const template = 'email,full_name,voter_id_number\nvoter@example.com,John Doe,12345\nvoter2@example.com,Jane Smith,67890';
+    const template = 'email,full_name,voter_id_number,google_email,house,residence,year_class\nvoter@example.com,John Doe,12345,voter@gmail.com,Mara,Residence A,Form 4\nvoter2@example.com,Jane Smith,67890,voter2@gmail.com,Lewa,Residence B,Form 3';
     const blob = new Blob([template], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -159,6 +159,11 @@ export default function VoterListUpload({ electionId, onUploadComplete }: VoterL
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Template Downloaded",
+      description: "Use this template to format your voter list CSV file.",
+    });
   };
 
   return (

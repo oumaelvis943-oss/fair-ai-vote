@@ -31,7 +31,8 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
     voting_algorithm: '' as VotingAlgorithm,
     max_candidates: 10,
     require_approval: true,
-    is_public: false
+    is_public: false,
+    single_position_per_candidate: false
   });
   const [positions, setPositions] = useState<PositionWithForm[]>([
     { name: '', slots: 1, sub_categories: [], application_form_fields: [] }
@@ -100,6 +101,7 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
           is_public: formData.is_public,
           positions: positions as any,
           application_form_fields: null,
+          eligibility_criteria: formData.single_position_per_candidate ? { single_position_only: true } : {},
           created_by: user.id,
           status: 'draft'
         });
@@ -120,7 +122,8 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
         voting_algorithm: '' as VotingAlgorithm,
         max_candidates: 10,
         require_approval: true,
-        is_public: false
+        is_public: false,
+        single_position_per_candidate: false
       });
       setPositions([{ name: '', slots: 1, sub_categories: [], application_form_fields: [] }]);
 
@@ -280,6 +283,19 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
               />
               <Label htmlFor="is_public" className="text-sm">
                 Make election public (voters can apply to participate)
+              </Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="single_position"
+                checked={formData.single_position_per_candidate}
+                onChange={(e) => setFormData({ ...formData, single_position_per_candidate: e.target.checked })}
+                className="rounded border-input"
+              />
+              <Label htmlFor="single_position" className="text-sm">
+                Restrict candidates to apply for only one position
               </Label>
             </div>
           </div>

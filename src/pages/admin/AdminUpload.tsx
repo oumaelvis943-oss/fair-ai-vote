@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import VoterListUpload from '@/components/admin/VoterListUpload';
+import ManualVoterAdd from '@/components/admin/ManualVoterAdd';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Election {
   id: string;
@@ -86,10 +88,26 @@ export default function AdminUpload() {
       </Card>
 
       {selectedElection && (
-        <VoterListUpload
-          electionId={selectedElection}
-          onUploadComplete={handleUploadComplete}
-        />
+        <Tabs defaultValue="bulk" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="bulk">Bulk Upload (CSV)</TabsTrigger>
+            <TabsTrigger value="manual">Add Single Voter</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="bulk" className="space-y-4 mt-6">
+            <VoterListUpload
+              electionId={selectedElection}
+              onUploadComplete={handleUploadComplete}
+            />
+          </TabsContent>
+          
+          <TabsContent value="manual" className="space-y-4 mt-6">
+            <ManualVoterAdd
+              electionId={selectedElection}
+              onVoterAdded={handleUploadComplete}
+            />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );

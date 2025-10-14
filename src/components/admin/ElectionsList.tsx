@@ -26,7 +26,7 @@ interface Election {
 }
 
 interface ElectionsListProps {
-  refreshTrigger: number;
+  refreshTrigger?: number;
   onEditElection?: (election: Election) => void;
 }
 

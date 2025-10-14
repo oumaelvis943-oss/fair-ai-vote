@@ -116,18 +116,19 @@ export default function VoterApplicationForm({
         .select('id')
         .eq('user_id', user?.id)
         .eq('election_id', election.id)
-        .single();
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') {
+      if (checkError) {
         throw checkError;
       }
 
       if (existingApplication) {
         toast({
           title: "Application Already Submitted",
-          description: "You have already applied for this election",
+          description: "You have already submitted an application for this election. You cannot submit multiple applications.",
           variant: "destructive",
         });
+        setSubmitting(false);
         return;
       }
 
@@ -142,7 +143,19 @@ export default function VoterApplicationForm({
           status: 'pending'
         });
 
-      if (error) throw error;
+      if (error) {
+        // Handle duplicate key error specifically
+        if (error.code === '23505') {
+          toast({
+            title: "Application Already Submitted",
+            description: "You have already submitted an application for this election.",
+            variant: "destructive",
+          });
+          setSubmitting(false);
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Application Submitted",
