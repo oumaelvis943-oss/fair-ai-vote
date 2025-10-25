@@ -103,15 +103,15 @@ export default function CandidateApplicationForm({
       // Check if user has already applied for this election
       const { data: existingApplication } = await supabase
         .from('candidates')
-        .select('id, status')
+        .select('id, status, position')
         .eq('user_id', user?.id)
         .eq('election_id', election.id)
-        .single();
+        .maybeSingle();
 
       if (existingApplication) {
         toast({
           title: "Application Already Exists",
-          description: `You have already applied for this election. Status: ${existingApplication.status}`,
+          description: `You have already applied for this election (Position: ${existingApplication.position}). Status: ${existingApplication.status}`,
           variant: "destructive",
         });
         return;
@@ -126,10 +126,22 @@ export default function CandidateApplicationForm({
           platform_statement: platformStatement,
           position: election.positions && election.positions.length > 0 ? selectedPosition : null,
           form_responses: formData,
-          status: 'pending'
+          status: 'pending',
+          verification_status: 'pending'
         });
 
-      if (error) throw error;
+      if (error) {
+        // Handle duplicate key error specifically
+        if (error.code === '23505') {
+          toast({
+            title: "Application Already Submitted",
+            description: "You have already submitted an application for this election. You cannot submit multiple applications.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Application Submitted",

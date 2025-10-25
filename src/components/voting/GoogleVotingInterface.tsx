@@ -116,22 +116,38 @@ export default function GoogleVotingInterface({ election }: GoogleVotingInterfac
 
   const fetchEligibleCandidates = async (eligiblePosts: string[]) => {
     try {
+      console.log('Fetching candidates for election:', election.id);
+      console.log('Eligible posts:', eligiblePosts);
+      
       const { data, error } = await supabase
         .from('candidates')
         .select(`
           id,
           user_id,
           position,
-          platform_statement
+          platform_statement,
+          status,
+          form_responses
         `)
         .eq('election_id', election.id)
-        .eq('status', 'approved')
-        .in('position', eligiblePosts);
+        .eq('status', 'approved');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching candidates:', error);
+        throw error;
+      }
+
+      console.log('All approved candidates:', data);
+      
+      // Filter by eligible posts
+      const filteredCandidates = (data || []).filter((candidate: any) => 
+        eligiblePosts.includes(candidate.position)
+      );
+      
+      console.log('Filtered candidates for eligible posts:', filteredCandidates);
 
       // Get profiles separately
-      const candidatesWithProfiles = await Promise.all((data || []).map(async (candidate: any) => {
+      const candidatesWithProfiles = await Promise.all(filteredCandidates.map(async (candidate: any) => {
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name, email')
@@ -144,7 +160,15 @@ export default function GoogleVotingInterface({ election }: GoogleVotingInterfac
         };
       }));
       
+      console.log('Candidates with profiles:', candidatesWithProfiles);
       setCandidates(candidatesWithProfiles);
+      
+      if (candidatesWithProfiles.length === 0) {
+        toast({
+          title: "No Candidates Available",
+          description: "There are no approved candidates for your eligible positions yet.",
+        });
+      }
     } catch (error: any) {
       console.error('Error fetching candidates:', error);
       toast({

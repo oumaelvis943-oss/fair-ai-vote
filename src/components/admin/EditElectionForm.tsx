@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Clock, Users, Vote, Settings, Plus, X, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ApplicationFormBuilder, { FormField } from './ApplicationFormBuilder';
+import { Checkbox } from '@/components/ui/checkbox';
+import PositionFormBuilder, { PositionWithForm } from './PositionFormBuilder';
 
 type VotingAlgorithm = 'fptp' | 'borda_count' | 'ranked_choice';
 
@@ -24,9 +25,9 @@ interface Election {
   max_candidates: number;
   require_approval: boolean;
   is_public: boolean;
-  positions: string[];
+  positions: any;
   status: string;
-  application_form_fields?: any;
+  eligibility_criteria?: any;
 }
 
 interface EditElectionFormProps {
@@ -47,10 +48,32 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
     max_candidates: election.max_candidates,
     require_approval: election.require_approval,
     is_public: election.is_public,
-    positions: election.positions?.length ? election.positions : ['']
+    single_position_per_candidate: election.eligibility_criteria?.single_position_only || false
   });
-  const [applicationFormFields, setApplicationFormFields] = useState<FormField[]>(
-    election.application_form_fields || []
+  
+  // Parse positions to ensure they have the correct structure
+  const parsePositions = (positions: any): PositionWithForm[] => {
+    if (!positions || !Array.isArray(positions)) {
+      return [{ name: '', slots: 1, sub_categories: [], application_form_fields: [] }];
+    }
+    
+    return positions.map((p: any) => {
+      if (typeof p === 'string') {
+        // Convert old string format to new object format
+        return { name: p, slots: 1, sub_categories: [], application_form_fields: [] };
+      }
+      // Ensure all required fields exist
+      return {
+        name: p.name || '',
+        slots: p.slots || 1,
+        sub_categories: p.sub_categories || [],
+        application_form_fields: p.application_form_fields || []
+      };
+    });
+  };
+  
+  const [positions, setPositions] = useState<PositionWithForm[]>(
+    parsePositions(election.positions)
   );
 
   const votingAlgorithms = [
@@ -76,6 +99,18 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate positions
+    const hasEmptyPositions = positions.some(p => !p.name || !p.name.trim());
+    if (hasEmptyPositions) {
+      toast({
+        title: "Validation Error",
+        description: "Please provide names for all positions.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -90,8 +125,8 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
           max_candidates: formData.max_candidates,
           require_approval: formData.require_approval,
           is_public: formData.is_public,
-          positions: formData.positions.filter(p => p.trim()),
-          application_form_fields: applicationFormFields as any
+          positions: positions as any,
+          eligibility_criteria: formData.single_position_per_candidate ? { single_position_only: true } : {}
         })
         .eq('id', election.id);
 
@@ -240,78 +275,57 @@ export default function EditElectionForm({ election, onElectionUpdated, onClose 
 
           <div className="space-y-3">
             <Label>Election Positions</Label>
-            {formData.positions.map((position, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={position}
-                  onChange={(e) => {
-                    const newPositions = [...formData.positions];
-                    newPositions[index] = e.target.value;
-                    setFormData({ ...formData, positions: newPositions });
-                  }}
-                  placeholder={`Position ${index + 1} (e.g., President, Vice President)`}
-                />
-                {formData.positions.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newPositions = formData.positions.filter((_, i) => i !== index);
-                      setFormData({ ...formData, positions: newPositions });
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setFormData({ ...formData, positions: [...formData.positions, ''] })}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Position
-            </Button>
+            <PositionFormBuilder 
+              positions={positions}
+              onChange={setPositions}
+            />
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 id="require_approval"
                 checked={formData.require_approval}
-                onChange={(e) => setFormData({ ...formData, require_approval: e.target.checked })}
-                className="rounded border-input"
+                onCheckedChange={(checked) => setFormData({ ...formData, require_approval: !!checked })}
               />
-              <Label htmlFor="require_approval" className="text-sm">
+              <Label htmlFor="require_approval" className="text-sm cursor-pointer">
                 Require admin approval for candidate applications
               </Label>
             </div>
             
             <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 id="is_public"
                 checked={formData.is_public}
-                onChange={(e) => setFormData({ ...formData, is_public: e.target.checked })}
-                className="rounded border-input"
+                onCheckedChange={(checked) => setFormData({ ...formData, is_public: !!checked })}
               />
-              <Label htmlFor="is_public" className="text-sm">
+              <Label htmlFor="is_public" className="text-sm cursor-pointer">
                 Make election public (voters can apply to participate)
+              </Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="single_position_per_candidate"
+                checked={formData.single_position_per_candidate}
+                onCheckedChange={(checked) => setFormData({ ...formData, single_position_per_candidate: !!checked })}
+              />
+              <Label htmlFor="single_position_per_candidate" className="text-sm cursor-pointer">
+                Restrict candidates to apply for only one position
               </Label>
             </div>
           </div>
             </TabsContent>
 
             <TabsContent value="form" className="space-y-6 mt-0">
-              <ApplicationFormBuilder
-                fields={applicationFormFields}
-                onChange={setApplicationFormFields}
-              />
+              <div className="text-sm text-muted-foreground">
+                <p className="mb-4">
+                  Application form fields are now configured per position. Switch to the Basic Settings tab and expand each position to customize its application form.
+                </p>
+                <p className="font-medium">
+                  Each position can have unique application questions tailored to that role.
+                </p>
+              </div>
             </TabsContent>
 
           <div className="flex gap-2 pt-4">

@@ -23,13 +23,13 @@ const Header = () => {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">
               Features
             </a>
-            <a href="#security" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#security" className="text-muted-foreground hover:text-primary transition-colors">
               Security
             </a>
-            <a href="#roles" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#roles" className="text-muted-foreground hover:text-primary transition-colors">
               Roles
             </a>
           </nav>
@@ -74,13 +74,13 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col space-y-4">
-              <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">
                 Features
               </a>
-              <a href="#security" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="#security" className="text-muted-foreground hover:text-primary transition-colors">
                 Security
               </a>
-              <a href="#roles" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="#roles" className="text-muted-foreground hover:text-primary transition-colors">
                 Roles
               </a>
               <div className="flex flex-col space-y-2 pt-4">

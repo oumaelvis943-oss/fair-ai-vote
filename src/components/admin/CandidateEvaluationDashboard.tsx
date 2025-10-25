@@ -126,18 +126,28 @@ export default function CandidateEvaluationDashboard() {
 
   const updateCandidateStatus = async (candidateId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('candidates')
-        .update({ status: newStatus })
-        .eq('id', candidateId);
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', candidateId)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating candidate status:', error);
+        throw error;
+      }
+
+      console.log('Status updated successfully:', data);
 
       // Update local state
       setCandidates(prev =>
         prev.map(candidate =>
           candidate.id === candidateId
-            ? { ...candidate, status: newStatus }
+            ? { ...candidate, status: newStatus, updated_at: new Date().toISOString() }
             : candidate
         )
       );
@@ -146,10 +156,14 @@ export default function CandidateEvaluationDashboard() {
         title: "Status Updated",
         description: `Candidate status changed to ${newStatus}`,
       });
+      
+      // Refresh candidates to ensure sync
+      await fetchCandidates();
     } catch (error: any) {
+      console.error('Full error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to update candidate status",
         variant: "destructive",
       });
     }

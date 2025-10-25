@@ -128,10 +128,10 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen }: AdminSideb
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground",
+                    "group flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
                     active 
-                      ? "bg-primary text-primary-foreground shadow-md" 
-                      : "text-muted-foreground"
+                      ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90" 
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                   onClick={() => setSidebarOpen(false)}
                 >

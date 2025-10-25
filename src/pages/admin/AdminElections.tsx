@@ -77,7 +77,7 @@ export default function AdminElections() {
       />
 
       <Dialog open={!!editingElection} onOpenChange={(open) => !open && setEditingElection(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-7xl w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Election</DialogTitle>
           </DialogHeader>
