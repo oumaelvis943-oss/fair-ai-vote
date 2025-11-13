@@ -84,6 +84,9 @@ verify_jwt = false
 [functions.schedule-elections]
 verify_jwt = false
 
+[functions.calculate-results]
+verify_jwt = true
+
 [edge-runtime]
 policy = "per_worker"
 inspector_port = 8083

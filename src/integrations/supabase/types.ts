@@ -624,6 +624,69 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          identifier: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          identifier: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          identifier?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       smtp_config: {
         Row: {
           created_at: string
@@ -791,6 +854,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vote_results: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          election_id: string
+          id: string
+          percentage: number | null
+          position: string
+          rank: number | null
+          updated_at: string
+          vote_count: number
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          election_id: string
+          id?: string
+          percentage?: number | null
+          position: string
+          rank?: number | null
+          updated_at?: string
+          vote_count?: number
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          election_id?: string
+          id?: string
+          percentage?: number | null
+          position?: string
+          rank?: number | null
+          updated_at?: string
+          vote_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vote_results_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vote_results_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vote_submissions: {
         Row: {
           created_at: string
@@ -875,12 +989,16 @@ export type Database = {
         Args: { candidate_uuid: string }
         Returns: number
       }
+      calculate_vote_results: {
+        Args: { p_election_id: string }
+        Returns: undefined
+      }
       check_voting_eligibility: {
         Args: { p_election_id: string; p_voter_email: string }
         Returns: Json
       }
       get_latest_block: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           block_hash: string
           block_number: number
@@ -891,6 +1009,12 @@ export type Database = {
           previous_block_hash: string | null
           timestamp: string
           votes_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vote_blocks"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       has_role: {

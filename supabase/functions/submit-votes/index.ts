@@ -6,6 +6,43 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting helper
+async function checkRateLimit(supabase: any, identifier: string, endpoint: string, maxRequests: number = 10): Promise<boolean> {
+  const windowStart = new Date();
+  windowStart.setMinutes(windowStart.getMinutes() - 5); // 5-minute window
+
+  const { data, error } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('identifier', identifier)
+    .eq('endpoint', endpoint)
+    .gte('window_start', windowStart.toISOString())
+    .maybeSingle();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Rate limit check error:', error);
+    return true; // Allow on error
+  }
+
+  if (data && data.request_count >= maxRequests) {
+    return false; // Rate limit exceeded
+  }
+
+  // Update or insert rate limit record
+  await supabase
+    .from('rate_limits')
+    .upsert({
+      identifier,
+      endpoint,
+      request_count: (data?.request_count || 0) + 1,
+      window_start: data ? data.window_start : new Date().toISOString()
+    }, {
+      onConflict: 'identifier,endpoint,window_start'
+    });
+
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -18,6 +55,23 @@ serve(async (req) => {
     );
 
     const { electionId, votes, voterEmail } = await req.json();
+
+    // Rate limiting check
+    const clientIp = req.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitOk = await checkRateLimit(supabaseClient, clientIp, 'submit-votes', 5);
+    
+    if (!rateLimitOk) {
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Too many requests. Please try again in a few minutes.'
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     if (!electionId || !votes || !voterEmail || Object.keys(votes).length === 0) {
       throw new Error('Election ID, votes, and voter email are required');
@@ -156,6 +210,22 @@ serve(async (req) => {
       .from('vote_audit_trail')
       .insert(auditEntries);
 
+    // Log security audit
+    await supabaseClient
+      .from('security_audit_log')
+      .insert({
+        user_id: voter.id,
+        action: 'vote_submitted',
+        resource_type: 'election',
+        resource_id: electionId,
+        ip_address: clientIp,
+        user_agent: req.headers.get('user-agent') || 'unknown',
+        details: {
+          submission_hash: submissionHash,
+          positions_voted: Object.keys(votes).length
+        }
+      });
+
     console.log('Votes submitted successfully:', submissionHash);
 
     return new Response(
@@ -170,13 +240,21 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in submit-votes:', error);
+    
+    // Don't expose detailed error messages to users for security
+    const userMessage = error.message.includes('eligible') || 
+                        error.message.includes('already voted') ||
+                        error.message.includes('not eligible')
+      ? error.message 
+      : 'Failed to submit votes. Please try again or contact support.';
+    
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message || 'Failed to submit votes'
+        error: userMessage
       }),
       {
-        status: 500,
+        status: error.message.includes('eligible') || error.message.includes('already voted') ? 400 : 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

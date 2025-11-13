@@ -42,15 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
-        // Check domain restriction for Google sign-ins
-        if (session?.user?.email && !session.user.email.endsWith('@mpesafoundationacademy.ac.ke')) {
-          await supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setLoading(false);
-          return;
-        }
+        // Domain restriction removed - check eligibility in voting interface instead
         
         setSession(session);
         setUser(session?.user ?? null);
