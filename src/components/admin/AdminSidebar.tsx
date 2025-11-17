@@ -10,7 +10,10 @@ import {
   Shield, 
   Settings,
   ChevronRight,
-  Activity
+  Activity,
+  Mail,
+  Mic,
+  UserCog
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,6 +73,24 @@ const navigationItems: NavigationItem[] = [
     href: '/admin/audit', 
     icon: Shield,
     description: 'Security & Compliance'
+  },
+  { 
+    name: 'User Roles', 
+    href: '/admin/roles', 
+    icon: UserCog,
+    description: 'Role Management'
+  },
+  { 
+    name: 'SMTP Config', 
+    href: '/admin/smtp', 
+    icon: Mail,
+    description: 'Email Settings'
+  },
+  { 
+    name: 'AI Interviews', 
+    href: '/admin/interviews', 
+    icon: Mic,
+    description: 'Candidate Interviews'
   },
   { 
     name: 'Settings', 

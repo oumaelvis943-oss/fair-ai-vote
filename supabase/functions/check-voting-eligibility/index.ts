@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { checkRateLimit, getRateLimitHeaders } from '../_shared/rate-limiter.ts';
+import { validateEmail, validateUUID, ValidationError } from '../_shared/validators.ts';
+import { logRequest } from '../_shared/audit-logger.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,6 +10,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  const startTime = Date.now();
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -17,10 +22,43 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Rate limiting
+    const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimit = await checkRateLimit(supabaseClient, {
+      identifier: ipAddress,
+      endpoint: 'check-voting-eligibility',
+      maxRequests: 10,
+      windowMinutes: 5,
+    });
+
+    if (!rateLimit.allowed) {
+      await logRequest(supabaseClient, req, 'check-voting-eligibility', 429, Date.now() - startTime, undefined, 'Rate limit exceeded');
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            ...getRateLimitHeaders(rateLimit.remaining, rateLimit.resetAt)
+          } 
+        }
+      );
+    }
+
     const { electionId, voterEmail } = await req.json();
 
+    // Input validation
     if (!electionId || !voterEmail) {
-      throw new Error('Election ID and voter email are required');
+      throw new ValidationError('Election ID and voter email are required');
+    }
+
+    if (!validateUUID(electionId)) {
+      throw new ValidationError('Invalid election ID format');
+    }
+
+    if (!validateEmail(voterEmail)) {
+      throw new ValidationError('Invalid email format');
     }
 
     console.log('Checking eligibility for:', { electionId, voterEmail });
@@ -135,13 +173,22 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in check-voting-eligibility:', error);
+    const statusCode = error instanceof ValidationError ? 400 : 500;
+    const errorMessage = error instanceof ValidationError ? error.message : 'Internal server error';
+    
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    await logRequest(supabaseClient, req, 'check-voting-eligibility', statusCode, Date.now() - startTime, undefined, errorMessage);
+    
     return new Response(
       JSON.stringify({ 
         eligible: false, 
-        reason: error.message || 'Internal server error' 
+        reason: errorMessage
       }),
       {
-        status: 500,
+        status: statusCode,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
