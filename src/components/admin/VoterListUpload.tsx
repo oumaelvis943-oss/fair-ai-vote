@@ -92,17 +92,32 @@ export default function VoterListUpload({ electionId, onUploadComplete }: VoterL
 
     setUploading(true);
     try {
+      // Validate CSV data
+      const { validateCSVData, sanitizeError } = await import('@/lib/validation');
+      const { valid, invalid } = validateCSVData(csvData);
+
+      if (invalid.length > 0) {
+        toast({
+          title: "Validation Errors",
+          description: `${invalid.length} rows have validation errors. Please fix and re-upload.`,
+          variant: "destructive",
+        });
+        console.error('Invalid rows:', invalid);
+        setUploading(false);
+        return;
+      }
+
       // Prepare data for insertion
-      const voterData = csvData.map(row => ({
+      const voterData = valid.map(row => ({
         election_id: electionId,
         email: row.email,
-        full_name: row.full_name || row.name || '',
-        voter_id_number: row.voter_id_number || row.id || '',
-        additional_info: Object.fromEntries(
+        full_name: row.full_name || '',
+        voter_id_number: row.voter_id_number || '',
+        additional_info: JSON.parse(JSON.stringify(Object.fromEntries(
           Object.entries(row).filter(([key]) => 
-            !['email', 'full_name', 'name', 'voter_id_number', 'id'].includes(key)
+            !['email', 'full_name', 'voter_id_number', '_rowIndex'].includes(key)
           )
-        )
+        )))
       }));
 
       // Insert eligible voters
@@ -138,9 +153,10 @@ export default function VoterListUpload({ electionId, onUploadComplete }: VoterL
 
       onUploadComplete();
     } catch (error: any) {
+      const { sanitizeError } = await import('@/lib/validation');
       toast({
         title: "Upload Failed",
-        description: error.message,
+        description: sanitizeError(error),
         variant: "destructive",
       });
     } finally {

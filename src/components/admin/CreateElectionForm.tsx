@@ -63,48 +63,43 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
     e.preventDefault();
     if (!user) return;
 
-    // Validate required fields
-    if (!formData.title || !formData.start_date || !formData.end_date || !formData.voting_algorithm) {
-      setActiveTab('basic');
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields in Basic Settings tab (Title, Start Date, End Date, Voting Algorithm).",
-        variant: "destructive",
-      });
-      return;
-    }
+    const { createElectionSchema, sanitizeError } = await import('@/lib/validation');
 
-    // Validate positions
-    const hasEmptyPositions = positions.some(p => !p.name || !p.name.trim());
-    if (hasEmptyPositions) {
-      setActiveTab('positions');
-      toast({
-        title: "Validation Error",
-        description: "Please provide names for all positions.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
     try {
+      // Validate basic form data
+      const validated = createElectionSchema.parse(formData);
+
+      // Validate positions
+      const hasEmptyPositions = positions.some(p => !p.name || !p.name.trim());
+      if (hasEmptyPositions) {
+        setActiveTab('positions');
+        toast({
+          title: "Validation Error",
+          description: "Please provide names for all positions.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLoading(true);
+      
       const { error } = await supabase
         .from('elections')
-        .insert({
-          title: formData.title,
-          description: formData.description,
-          start_date: formData.start_date,
-          end_date: formData.end_date,
-          voting_algorithm: formData.voting_algorithm,
-          max_candidates: formData.max_candidates,
-          require_approval: formData.require_approval,
-          is_public: formData.is_public,
-          positions: positions as any,
+        .insert([{
+          title: validated.title,
+          description: validated.description || null,
+          start_date: validated.start_date,
+          end_date: validated.end_date,
+          voting_algorithm: validated.voting_algorithm,
+          max_candidates: validated.max_candidates,
+          require_approval: validated.require_approval,
+          is_public: validated.is_public,
+          positions: JSON.parse(JSON.stringify(positions)),
           application_form_fields: null,
-          eligibility_criteria: formData.single_position_per_candidate ? { single_position_only: true } : {},
+          eligibility_criteria: formData.single_position_per_candidate ? { single_position_only: true } : null,
           created_by: user.id,
           status: 'draft'
-        });
+        }]);
 
       if (error) throw error;
 
@@ -129,9 +124,10 @@ export default function CreateElectionForm({ onElectionCreated }: CreateElection
 
       onElectionCreated();
     } catch (error: any) {
+      const { sanitizeError } = await import('@/lib/validation');
       toast({
         title: "Error",
-        description: error.message,
+        description: error.errors?.[0]?.message || sanitizeError(error),
         variant: "destructive",
       });
     } finally {
