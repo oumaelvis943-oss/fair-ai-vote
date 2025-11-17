@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(profileData as Profile);
       }
 
-      // Fetch user role using direct query (types will update after migration)
+      // Fetch user role - prioritize admin role if user has multiple
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles' as any)
         .select('role')
@@ -102,12 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (roleError) {
         console.error('Error fetching role:', roleError);
+        setRole('voter'); // Default to voter on error
         return;
       }
 
-      if (roleData) {
-        setRole((roleData as any).role as 'admin' | 'candidate' | 'voter');
-      }
+      setRole((roleData as any)?.role as 'admin' | 'candidate' | 'voter' || 'voter');
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
