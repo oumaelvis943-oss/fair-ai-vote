@@ -62,7 +62,7 @@ const Footer = () => {
         
         <div className="border-t border-primary-light/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-primary-foreground/60">
-            © 2024 Uchaguzi MFA. All rights reserved.
+            © 2025 Uchaguzi MFA. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors">

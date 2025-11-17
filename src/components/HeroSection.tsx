@@ -2,8 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Vote, Users, BarChart3, ArrowRight, Sparkles } from "lucide-react";
 import heroImage from "@/assets/voting-hero.jpg";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       {/* Animated background elements */}
@@ -46,7 +49,7 @@ const HeroSection = () => {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-lg px-8 py-6 h-auto bg-gradient-to-r from-primary to-primary-glow hover:shadow-primary group">
+              <Button size="lg" className="text-lg px-8 py-6 h-auto bg-gradient-to-r from-primary to-primary-glow hover:shadow-primary group" onClick={() => navigate('/auth')}>
                 Start Election
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
