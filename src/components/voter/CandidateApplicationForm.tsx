@@ -55,51 +55,33 @@ export default function CandidateApplicationForm({
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!platformStatement.trim()) {
-      toast({
-        title: "Error",
-        description: "Please provide your platform statement",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (election.positions && election.positions.length > 0 && !selectedPosition) {
-      toast({
-        title: "Error",
-        description: "Please select a position to apply for",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate position-specific form fields
-    if (selectedPositionData?.formFields) {
-      const missingRequired = selectedPositionData.formFields.filter(
-        (field: any) => field.required && !formData[field.id]
-      );
-      if (missingRequired.length > 0) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    if (platformStatement.length < 100) {
-      toast({
-        title: "Error",
-        description: "Platform statement must be at least 100 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSubmitting(true);
+    const { candidateApplicationSchema, sanitizeError } = await import('@/lib/validation');
 
     try {
+      // Validate application data
+      const validated = candidateApplicationSchema.parse({
+        platform_statement: platformStatement,
+        position: selectedPosition,
+        form_responses: formData,
+      });
+
+      // Validate position-specific form fields
+      if (selectedPositionData?.formFields) {
+        const missingRequired = selectedPositionData.formFields.filter(
+          (field: any) => field.required && !formData[field.id]
+        );
+        if (missingRequired.length > 0) {
+          toast({
+            title: "Error",
+            description: "Please fill in all required fields",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      setSubmitting(true);
+
       // Check if user has already applied for this election
       const { data: existingApplication } = await supabase
         .from('candidates')
@@ -114,6 +96,7 @@ export default function CandidateApplicationForm({
           description: `You have already applied for this election (Position: ${existingApplication.position}). Status: ${existingApplication.status}`,
           variant: "destructive",
         });
+        setSubmitting(false);
         return;
       }
 
@@ -150,10 +133,11 @@ export default function CandidateApplicationForm({
 
       onApplicationSubmitted();
     } catch (error: any) {
+      const { sanitizeError } = await import('@/lib/validation');
       console.error('Error submitting application:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to submit application",
+        description: error.errors?.[0]?.message || sanitizeError(error),
         variant: "destructive",
       });
     } finally {

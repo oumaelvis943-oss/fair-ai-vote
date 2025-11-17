@@ -28,28 +28,26 @@ export default function ManualVoterAdd({ electionId, onVoterAdded }: ManualVoter
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email) {
-      toast({
-        title: "Validation Error",
-        description: "Email is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
+    // Import validation on demand
+    const { manualVoterSchema, sanitizeError } = await import('@/lib/validation');
+    
     try {
+      // Validate form data
+      const validated = manualVoterSchema.parse(formData);
+      
+      setLoading(true);
+      
       const { error } = await supabase
         .from('eligible_voters')
         .insert({
           election_id: electionId,
-          email: formData.email,
-          full_name: formData.full_name || null,
-          voter_id_number: formData.voter_id_number || null,
-          house: formData.house || null,
-          residence: formData.residence || null,
-          year_class: formData.year_class || null,
-          google_email: formData.google_email || null
+          email: validated.email,
+          full_name: validated.full_name || null,
+          voter_id_number: validated.voter_id_number || null,
+          house: validated.house || null,
+          residence: validated.residence || null,
+          year_class: validated.year_class || null,
+          google_email: validated.google_email || null
         });
 
       if (error) throw error;
@@ -72,9 +70,10 @@ export default function ManualVoterAdd({ electionId, onVoterAdded }: ManualVoter
 
       onVoterAdded();
     } catch (error: any) {
+      const { sanitizeError } = await import('@/lib/validation');
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Validation Error",
+        description: error.errors?.[0]?.message || sanitizeError(error),
         variant: "destructive",
       });
     } finally {
