@@ -43,7 +43,7 @@ export const manualVoterSchema = z.object({
 // Election creation validation
 export const createElectionSchema = z.object({
   title: safeStringSchema(200, 3),
-  description: safeStringSchema(5000),
+  description: z.string().trim().max(5000, { message: "Description must be less than 5000 characters" }).nullable().optional().or(z.literal('')),
   start_date: z.string().datetime().or(z.string().refine(
     (date) => !isNaN(Date.parse(date)),
     { message: "Invalid start date" }
