@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -18,6 +19,9 @@ import AdminCandidates from "./pages/admin/AdminCandidates";
 import AdminUpload from "./pages/admin/AdminUpload";
 import AdminAudit from "./pages/admin/AdminAudit";
 import AdminSettingsPage from "./pages/admin/AdminSettings";
+import AdminSMTP from "./pages/admin/AdminSMTP";
+import AdminInterviews from "./pages/admin/AdminInterviews";
+import AdminRoles from "./pages/admin/AdminRoles";
 import VoterApplication from "./pages/VoterApplication";
 import VoterDashboard from "./pages/VoterDashboard";
 import VotingPage from "./pages/VotingPage";
@@ -27,12 +31,13 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -52,6 +57,9 @@ const App = () => (
               <Route path="upload" element={<AdminUpload />} />
               <Route path="audit" element={<AdminAudit />} />
               <Route path="settings" element={<AdminSettingsPage />} />
+              <Route path="smtp" element={<AdminSMTP />} />
+              <Route path="interviews" element={<AdminInterviews />} />
+              <Route path="roles" element={<AdminRoles />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -60,6 +68,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
+    </ErrorBoundary>
   </QueryClientProvider>
 );
 

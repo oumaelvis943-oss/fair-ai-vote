@@ -558,6 +558,30 @@ export type Database = {
           },
         ]
       }
+      failed_login_attempts: {
+        Row: {
+          attempted_at: string
+          email: string
+          id: string
+          ip_address: string
+          user_agent: string | null
+        }
+        Insert: {
+          attempted_at?: string
+          email: string
+          id?: string
+          ip_address: string
+          user_agent?: string | null
+        }
+        Update: {
+          attempted_at?: string
+          email?: string
+          id?: string
+          ip_address?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -651,6 +675,48 @@ export type Database = {
         }
         Relationships: []
       }
+      request_logs: {
+        Row: {
+          endpoint: string
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          method: string
+          request_body: Json | null
+          response_time_ms: number | null
+          status_code: number | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          method: string
+          request_body?: Json | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          method?: string
+          request_body?: Json | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -696,6 +762,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           password: string
+          password_encrypted: string | null
           port: number
           updated_at: string
           username: string
@@ -708,6 +775,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           password: string
+          password_encrypted?: string | null
           port?: number
           updated_at?: string
           username: string
@@ -720,6 +788,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           password?: string
+          password_encrypted?: string | null
           port?: number
           updated_at?: string
           username?: string
@@ -743,6 +812,42 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          last_activity: string
+          session_token: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_activity?: string
+          session_token: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_activity?: string
+          session_token?: string
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []
@@ -993,6 +1098,10 @@ export type Database = {
         Args: { p_election_id: string }
         Returns: undefined
       }
+      check_login_attempts: {
+        Args: { p_email: string; p_ip_address: string }
+        Returns: Json
+      }
       check_voting_eligibility: {
         Args: { p_election_id: string; p_voter_email: string }
         Returns: Json
@@ -1017,6 +1126,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_smtp_password: { Args: { config_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
