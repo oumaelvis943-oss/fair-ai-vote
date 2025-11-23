@@ -120,27 +120,51 @@ export default function VoterListUpload({ electionId, onUploadComplete }: VoterL
         )))
       }));
 
-      // Insert eligible voters
-      const { error } = await supabase
+      // Check for existing voters first
+      const emails = voterData.map(v => v.email);
+      const { data: existingVoters } = await supabase
         .from('eligible_voters')
-        .upsert(voterData, { 
-          onConflict: 'election_id,email',
-          ignoreDuplicates: false 
-        });
+        .select('email')
+        .eq('election_id', electionId)
+        .in('email', emails);
 
-      if (error) throw error;
+      const existingEmails = new Set(existingVoters?.map(v => v.email) || []);
+      
+      // Separate new and existing voters
+      const newVoters = voterData.filter(v => !existingEmails.has(v.email));
+      const updateVoters = voterData.filter(v => existingEmails.has(v.email));
 
-      // Update election to mark voter list as uploaded
-      const { error: updateError } = await supabase
-        .from('elections')
-        .update({ voter_list_uploaded: true })
-        .eq('id', electionId);
+      // Insert new voters
+      if (newVoters.length > 0) {
+        const { error: insertError } = await supabase
+          .from('eligible_voters')
+          .insert(newVoters);
+        
+        if (insertError) throw insertError;
+      }
 
-      if (updateError) throw updateError;
+      // Update existing voters
+      for (const voter of updateVoters) {
+        const { error: updateError } = await supabase
+          .from('eligible_voters')
+          .update({
+            full_name: voter.full_name,
+            voter_id_number: voter.voter_id_number,
+            additional_info: voter.additional_info,
+          })
+          .eq('election_id', electionId)
+          .eq('email', voter.email);
+        
+        if (updateError) throw updateError;
+      }
+
+      if (newVoters.length === 0 && updateVoters.length === 0) {
+        throw new Error('No voters to upload');
+      }
 
       toast({
         title: "Voters Uploaded",
-        description: `Successfully uploaded ${csvData.length} eligible voters.`,
+        description: `Successfully uploaded ${newVoters.length} new voters and updated ${updateVoters.length} existing voters.`,
       });
 
       // Reset form
