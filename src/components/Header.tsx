@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Vote, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import logoImage from "@/assets/uchaguzi-logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,10 +15,8 @@ const Header = () => {
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-gradient-institutional rounded-lg">
-              <Vote className="h-6 w-6 text-white" />
-            </div>
+          <div className="flex items-center space-x-3">
+            <img src={logoImage} alt="Uchaguzi MFA Logo" className="h-12 w-12 object-contain" />
             <span className="text-xl font-bold text-foreground">Uchaguzi MFA</span>
           </div>
           
