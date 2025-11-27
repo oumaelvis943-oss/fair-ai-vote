@@ -1106,6 +1106,7 @@ export type Database = {
         Args: { p_election_id: string; p_voter_email: string }
         Returns: Json
       }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       get_latest_block: {
         Args: never
         Returns: {

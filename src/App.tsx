@@ -1,10 +1,11 @@
+import { useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -29,47 +30,57 @@ import ResultsPage from "./pages/ResultsPage";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  useEffect(() => {
+    // Log app initialization for monitoring
+    console.log('Uchaguzi MFA initialized', {
+      version: '1.0.0',
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString()
+    });
+  }, []);
+
+  return (
     <ErrorBoundary>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/admin-setup" element={<InitialAdminSetup />} />
-            <Route path="/apply" element={<VoterApplication />} />
-            <Route path="/voter" element={<VoterDashboard />} />
-            <Route path="/vote/:electionId" element={<VotingPage />} />
-            <Route path="/results/:electionId" element={<ResultsPage />} />
-            
-            {/* Admin Routes with Sidebar Layout */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminOverview />} />
-              <Route path="elections" element={<AdminElections />} />
-              <Route path="create" element={<AdminCreate />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-              <Route path="candidates" element={<AdminCandidates />} />
-              <Route path="upload" element={<AdminUpload />} />
-              <Route path="audit" element={<AdminAudit />} />
-              <Route path="settings" element={<AdminSettingsPage />} />
-              <Route path="smtp" element={<AdminSMTP />} />
-              <Route path="interviews" element={<AdminInterviews />} />
-              <Route path="roles" element={<AdminRoles />} />
-            </Route>
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/admin-setup" element={<InitialAdminSetup />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/apply" element={<VoterApplication />} />
+                <Route path="/voter" element={<VoterDashboard />} />
+                <Route path="/vote/:electionId" element={<VotingPage />} />
+                <Route path="/results/:electionId" element={<ResultsPage />} />
+                
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminOverview />} />
+                  <Route path="overview" element={<AdminOverview />} />
+                  <Route path="elections" element={<AdminElections />} />
+                  <Route path="create" element={<AdminCreate />} />
+                  <Route path="candidates" element={<AdminCandidates />} />
+                  <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="settings" element={<AdminSettingsPage />} />
+                  <Route path="upload" element={<AdminUpload />} />
+                  <Route path="audit" element={<AdminAudit />} />
+                  <Route path="smtp" element={<AdminSMTP />} />
+                  <Route path="interviews" element={<AdminInterviews />} />
+                  <Route path="roles" element={<AdminRoles />} />
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
-  </QueryClientProvider>
-);
+  );
+};
 
 export default App;
